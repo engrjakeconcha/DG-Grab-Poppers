@@ -66,6 +66,7 @@ try:
         START_IMAGE_PATH,
         ORDER_COMPLETE_IMAGE_PATH,
         MINIAPP_URL,
+        REPORT_ISSUE_URL,
         ADMIN_URL,
         STATE_DIR,
         LOCK_DIR,
@@ -86,6 +87,7 @@ except ImportError:
         START_IMAGE_PATH,
         ORDER_COMPLETE_IMAGE_PATH,
         MINIAPP_URL,
+        REPORT_ISSUE_URL,
         ADMIN_URL,
         STATE_DIR,
         LOCK_DIR,
@@ -101,6 +103,7 @@ INSTANCE_LOCK_ROOT = LOCK_DIR
 INSTANCE_LOCK_STALE_SECONDS = 120
 PERSISTENCE_PATH = STATE_DIR / "daddygrab-bot.json"
 DADDY_GRAB_MINIAPP_URL = MINIAPP_URL
+DADDY_GRAB_REPORT_ISSUE_URL = REPORT_ISSUE_URL
 DADDY_GRAB_ADMIN_URL = ADMIN_URL
 
 
@@ -1776,9 +1779,7 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
     """Build the main menu keyboard."""
     return ReplyKeyboardMarkup(
         [
-            ["🛍️ Open Mini App", "🔎 Track Order"],
-            ["💬 Contact Admin", "📦 Bulk Orders"],
-            ["🎁 Rewards", "🤝 Affiliate"],
+            ["Super App", "Report Issue"],
         ],
         resize_keyboard=True,
     )
@@ -1844,6 +1845,13 @@ def catalogue_redirect_keyboard() -> InlineKeyboardMarkup:
     )
 
 
+def report_issue_keyboard() -> InlineKeyboardMarkup:
+    """Link users to the hosted report issue page."""
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Report Issue", web_app=WebAppInfo(url=DADDY_GRAB_REPORT_ISSUE_URL))]]
+    )
+
+
 def admin_tools_keyboard() -> InlineKeyboardMarkup:
     """Link admins to the hosted admin console."""
     return InlineKeyboardMarkup(
@@ -1854,7 +1862,7 @@ def admin_tools_keyboard() -> InlineKeyboardMarkup:
 def miniapp_redirect_message(action: str = "continue") -> str:
     """Return consistent redirect copy for storefront actions."""
     if action == "support":
-        return "Need help? Open the Daddy Grab Mini App and use support chat so the team can assist you faster."
+        return "Need help? Open the Report Issue page below so the team can assist you faster."
     if action == "bulk":
         return "Bulk orders are handled in the Daddy Grab Mini App. Open it below and send your product list, quantities, and target date."
     if action == "rewards":
@@ -2236,7 +2244,7 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text("Perfect. We’re opening your selected item now.")
             return await open_catalog_product_by_sku(update.message, context, pending_sku)
         await update.message.reply_text(
-            "You’re all set.\nTap *Catalogue* to open the Mini App and place your order.\nNeed help? Tap *Contact Admin*.",
+            "You’re all set.\nTap *Super App* to open Daddy Grab.\nTap *Report Issue* if you need customer support.",
             reply_markup=main_menu_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
@@ -2255,40 +2263,16 @@ async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     """Route main menu selections."""
     register_private_user(context, update.effective_user, update.effective_chat.id)
     text = update.message.text.strip()
-    if "Mini App" in text or "Catalogue" in text or "Ordering" in text:
+    if "Super App" in text:
         return await ordering_start(update, context)
-    if "Track Order" in text:
+    if "Report Issue" in text:
+        await notify_admin_support_request(update, context, "Report Issue")
         await update.message.reply_text(
-            miniapp_redirect_message("track"),
-            reply_markup=catalogue_redirect_keyboard(),
+            miniapp_redirect_message("support"),
+            reply_markup=report_issue_keyboard(),
         )
         return MENU
-    if "Contact Admin" in text or "Customer Service" in text:
-        await notify_admin_support_request(update, context, "Contact Admin")
-        await update.message.reply_text(
-            "The admin team has been notified. You can also continue in the Mini App below.",
-            reply_markup=catalogue_redirect_keyboard(),
-        )
-        return MENU
-    if "Bulk Orders" in text:
-        await update.message.reply_text(
-            miniapp_redirect_message("bulk"),
-            reply_markup=catalogue_redirect_keyboard(),
-        )
-        return MENU
-    if "Refer a Friend" in text:
-        await update.message.reply_text(
-            miniapp_redirect_message("rewards"),
-            reply_markup=catalogue_redirect_keyboard(),
-        )
-        return MENU
-    if "Affiliate Enrollment" in text:
-        await update.message.reply_text(
-            miniapp_redirect_message("affiliate"),
-            reply_markup=catalogue_redirect_keyboard(),
-        )
-        return MENU
-    await update.message.reply_text("Pick one of the buttons below to continue.", reply_markup=main_menu_keyboard())
+    await update.message.reply_text("Choose either Super App or Report Issue below.", reply_markup=main_menu_keyboard())
     return MENU
 
 
