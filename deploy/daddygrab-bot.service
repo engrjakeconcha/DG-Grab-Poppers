@@ -1,0 +1,15 @@
+[Unit]
+Description=Daddy Grab Super App Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/daddygrab-super-app/app
+EnvironmentFile=/opt/daddygrab-super-app/app/.env
+ExecStart=/opt/daddygrab-super-app/app/venv/bin/python /opt/daddygrab-super-app/app/bot.py
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
