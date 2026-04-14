@@ -59,10 +59,10 @@ body.telegram {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   width: 100%;
   min-height: 118px;
-  padding: 12px 10px;
+  padding: 12px 12px 12px 8px;
   border-radius: 28px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
@@ -78,12 +78,13 @@ body.telegram {
   width: min(100%, 300px);
   height: 64px;
   object-fit: contain;
-  object-position: center;
+  object-position: right center;
 }
 
 .topbar-logo-hero {
   width: min(100%, 360px);
   height: 104px;
+  margin-left: auto;
 }
 
 .section-kicker {
