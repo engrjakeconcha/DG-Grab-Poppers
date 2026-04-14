@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -19,65 +19,73 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero-shell">
-        <div class="hero-badge">Daddy Grab Super App</div>
-        <div class="hero-logo-wrap">
-          <img class="hero-logo" src="./assets/logo.png" alt="Daddy Grab logo" />
-        </div>
-        <h1 id="greeting">Pick your next stop.</h1>
+      <section class="hero-stage">
+        <header class="topbar">
+          <img class="topbar-logo" src="./assets/logo640x360.jpeg" alt="Daddy Grab Super App" />
+        </header>
+
+        <section class="ads-strip" aria-label="Google ads placeholders">
+          <article class="ad-card ad-card-wide">
+            <span class="ad-label">Google Ads</span>
+            <strong>Premium placement 320 x 100</strong>
+          </article>
+          <article class="ad-card">
+            <span class="ad-label">Google Ads</span>
+            <strong>Partner slot</strong>
+          </article>
+        </section>
       </section>
 
       <section class="tile-grid" aria-label="Daddy Grab destinations">
         <a class="service-tile" href="https://daddygrab.online/store" data-telegram="true">
-          <span class="tile-icon tile-green">🛍️</span>
+          <img class="tile-icon" src="./assets/icon-shop.svg" alt="" />
           <span class="tile-title">One Stop Shop</span>
         </a>
 
         <a class="service-tile" href="https://daddygrab.online/book" data-telegram="true">
-          <span class="tile-icon tile-mint">📅</span>
+          <img class="tile-icon" src="./assets/icon-book.svg" alt="" />
           <span class="tile-title">Book me!</span>
         </a>
 
         <a class="service-tile" href="https://daddygrab.online/events" data-telegram="true">
-          <span class="tile-icon tile-gold">🎟️</span>
+          <img class="tile-icon" src="./assets/icon-events.svg" alt="" />
           <span class="tile-title">Our Events!</span>
         </a>
 
         <a class="service-tile" href="https://daddygrab.online/channels" data-telegram="true">
-          <span class="tile-icon tile-sage">📣</span>
+          <img class="tile-icon" src="./assets/icon-channels.svg" alt="" />
           <span class="tile-title">Channels</span>
         </a>
 
         <a class="service-tile" href="https://daddygrab.online/report" data-telegram="true">
-          <span class="tile-icon tile-coral">🛟</span>
+          <img class="tile-icon" src="./assets/icon-report.svg" alt="" />
           <span class="tile-title">Report Issue</span>
         </a>
 
         <a class="service-tile" href="https://daddygrab.online/track" data-telegram="true">
-          <span class="tile-icon tile-soft">📦</span>
+          <img class="tile-icon" src="./assets/icon-track.svg" alt="" />
           <span class="tile-title">Track my Order</span>
         </a>
 
         <a class="service-tile" href="https://x.com" data-telegram="true">
-          <span class="tile-icon tile-dark">𝕏</span>
+          <img class="tile-icon" src="./assets/icon-x.svg" alt="" />
           <span class="tile-title">X</span>
         </a>
 
         <a class="service-tile" href="https://tevi.com" data-telegram="true">
-          <span class="tile-icon tile-rose">TV</span>
+          <img class="tile-icon" src="./assets/icon-tevi.svg" alt="" />
           <span class="tile-title">Tevi</span>
         </a>
 
         <a class="service-tile" href="https://jff.com" data-telegram="true">
-          <span class="tile-icon tile-sun">JF</span>
+          <img class="tile-icon" src="./assets/icon-jff.svg" alt="" />
           <span class="tile-title">JFF</span>
         </a>
       </section>
 
       <section class="partners-section">
         <div class="section-head">
-          <p class="section-kicker">Partner Placements</p>
-          <h2>Here’s our partners</h2>
+          <p class="section-kicker">Here’s our partners</p>
         </div>
 
         <div class="partner-marquee" aria-label="Scrolling partner placements">
@@ -85,9 +93,9 @@
             <a class="partner-image" href="https://x.com"><img src="./assets/partner-x.svg" alt="X partner mock" /></a>
             <a class="partner-image" href="https://tevi.com"><img src="./assets/partner-tevi.svg" alt="Tevi partner mock" /></a>
             <a class="partner-image" href="https://jff.com"><img src="./assets/partner-jff.svg" alt="JFF partner mock" /></a>
-            <a class="partner-image" href="https://x.com"><img src="./assets/partner-x.svg" alt="X partner mock duplicate" /></a>
-            <a class="partner-image" href="https://tevi.com"><img src="./assets/partner-tevi.svg" alt="Tevi partner mock duplicate" /></a>
-            <a class="partner-image" href="https://jff.com"><img src="./assets/partner-jff.svg" alt="JFF partner mock duplicate" /></a>
+            <a class="partner-image" href="https://x.com"><img src="./assets/partner-x.svg" alt="" /></a>
+            <a class="partner-image" href="https://tevi.com"><img src="./assets/partner-tevi.svg" alt="" /></a>
+            <a class="partner-image" href="https://jff.com"><img src="./assets/partner-jff.svg" alt="" /></a>
           </div>
         </div>
       </section>

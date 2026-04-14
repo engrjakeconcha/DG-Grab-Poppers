@@ -1,17 +1,20 @@
 :root {
   --white: #ffffff;
-  --logo-green: #143a20;
-  --logo-green-soft: #21512c;
-  --logo-lime: #c7d94b;
-  --logo-lime-soft: #edf4bf;
-  --text-main: #17331d;
-  --text-muted: #6a786d;
-  --glass: rgba(255, 255, 255, 0.66);
+  --dark-green: #153b20;
+  --forest: #21492b;
+  --forest-deep: #102918;
+  --lime: #c8d54a;
+  --mist: #f7faf6;
+  --glass: rgba(255, 255, 255, 0.64);
+  --glass-strong: rgba(255, 255, 255, 0.78);
   --glass-border: rgba(255, 255, 255, 0.58);
-  --glass-shadow: 0 18px 34px rgba(10, 38, 20, 0.16);
-  --radius-xl: 30px;
-  --radius-lg: 22px;
-  --radius-md: 18px;
+  --text-main: #18311d;
+  --text-soft: #728173;
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --shadow-soft: 0 12px 30px rgba(16, 39, 22, 0.08);
+  --shadow-tile: 0 8px 22px rgba(13, 33, 17, 0.08);
 }
 
 * {
@@ -21,18 +24,18 @@
 html {
   min-height: 100%;
   background:
-    radial-gradient(circle at top left, rgba(199, 217, 75, 0.7), transparent 22%),
-    linear-gradient(180deg, var(--logo-green) 0 220px, #ffffff 220px 100%);
+    radial-gradient(circle at top left, rgba(200, 213, 74, 0.66), transparent 18%),
+    linear-gradient(180deg, var(--dark-green) 0 170px, #ffffff 170px 100%);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  font-family: "Manrope", sans-serif;
   color: var(--text-main);
-  font-family: "DM Sans", sans-serif;
   background:
-    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.18), transparent 16%),
-    radial-gradient(circle at 90% 12%, rgba(199, 217, 75, 0.24), transparent 18%);
+    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.12), transparent 18%),
+    linear-gradient(180deg, transparent 0 172px, #ffffff 172px 100%);
 }
 
 body.telegram {
@@ -43,163 +46,132 @@ body.telegram {
 .app-shell {
   width: min(100%, 430px);
   margin: 0 auto;
-  padding: 18px 14px 34px;
+  padding: 12px 14px 34px;
 }
 
-.hero-shell {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  padding: 14px 8px 10px;
+.hero-stage {
+  position: relative;
+  padding: 8px 0 4px;
 }
 
-.hero-badge,
-.section-kicker {
-  display: inline-flex;
+.topbar {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.hero-logo-wrap {
-  width: 116px;
-  height: 116px;
-  padding: 12px;
-  display: grid;
-  place-items: center;
-  border-radius: 34px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow:
-    0 18px 30px rgba(5, 26, 13, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.78);
-}
-
-.hero-logo {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  min-height: 58px;
+  padding: 8px 12px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-#greeting {
+.topbar-logo {
+  display: block;
+  width: min(100%, 230px);
+  height: 40px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.ads-strip {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ad-card {
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.72));
+  border: 1px solid rgba(24, 60, 31, 0.06);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.ad-card-wide {
+  background:
+    radial-gradient(circle at top right, rgba(200, 213, 74, 0.28), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.74));
+}
+
+.ad-label,
+.section-kicker {
   margin: 0;
-  color: #ffffff;
-  font-family: "Nunito", sans-serif;
-  font-size: 1.65rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.ad-card strong {
+  font-family: "Sora", sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.15;
 }
 
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .service-tile {
-  min-height: 122px;
-  padding: 12px 8px 14px;
+  min-height: 112px;
+  padding: 10px 8px 12px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(248, 251, 248, 0.78));
+  border: 1px solid rgba(24, 60, 31, 0.07);
+  box-shadow: var(--shadow-tile);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.62)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -10px 20px rgba(20, 58, 32, 0.04);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  gap: 9px;
   position: relative;
   overflow: hidden;
+}
+
+.service-tile:active {
+  transform: scale(0.988);
 }
 
 .service-tile::before {
   content: "";
   position: absolute;
-  inset: 0 auto auto 0;
-  width: 70%;
-  height: 48%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.68), transparent 74%);
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 46%);
   pointer-events: none;
-}
-
-.service-tile:active {
-  transform: translateY(1px) scale(0.99);
 }
 
 .tile-icon {
   width: 56px;
   height: 56px;
-  border-radius: 18px;
-  display: grid;
-  place-items: center;
-  font-family: "Nunito", sans-serif;
-  font-size: 1.45rem;
-  font-weight: 900;
-  color: #ffffff;
-  box-shadow:
-    0 14px 20px rgba(17, 48, 26, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  border-radius: 16px;
+  display: block;
 }
 
 .tile-title {
   text-align: center;
-  font-family: "Nunito", sans-serif;
-  font-size: 0.88rem;
-  font-weight: 800;
+  font-family: "Sora", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.05;
-}
-
-.tile-green {
-  background: linear-gradient(145deg, #1e9a48, #173a21);
-}
-
-.tile-mint {
-  background: linear-gradient(145deg, #5cbf8a, #207a58);
-}
-
-.tile-gold {
-  background: linear-gradient(145deg, #e7bc4d, #ba7f17);
-}
-
-.tile-sage {
-  background: linear-gradient(145deg, #4abf90, #24584b);
-}
-
-.tile-coral {
-  background: linear-gradient(145deg, #e97755, #bc4c2d);
-}
-
-.tile-soft {
-  background: linear-gradient(145deg, #3fb08e, #18594c);
-}
-
-.tile-dark {
-  background: linear-gradient(145deg, #27322a, #060807);
-}
-
-.tile-rose {
-  background: linear-gradient(145deg, #cb6a8b, #87395c);
-}
-
-.tile-sun {
-  background: linear-gradient(145deg, #d6d858, #7c8620);
+  line-height: 1.15;
+  max-width: 84px;
 }
 
 .partners-section {
@@ -207,43 +179,29 @@ body.telegram {
 }
 
 .section-head {
-  margin-bottom: 12px;
-}
-
-.section-kicker {
-  background: rgba(20, 58, 32, 0.08);
-  color: var(--logo-green-soft);
-}
-
-.section-head h2 {
-  margin: 10px 0 0;
-  font-family: "Nunito", sans-serif;
-  font-size: 1.3rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  margin-bottom: 10px;
 }
 
 .partner-marquee {
   overflow: hidden;
-  position: relative;
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 
 .partner-track {
   display: flex;
   width: max-content;
   gap: 14px;
-  animation: marquee 22s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .partner-image {
   display: block;
   flex: 0 0 auto;
   width: 220px;
-  border-radius: 24px;
+  border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 18px 26px rgba(17, 48, 26, 0.14);
+  box-shadow: var(--shadow-soft);
 }
 
 .partner-image img {
@@ -262,20 +220,20 @@ body.telegram {
 }
 
 @media (max-width: 380px) {
+  .ads-strip {
+    grid-template-columns: 1fr;
+  }
+
   .service-tile {
-    min-height: 112px;
+    min-height: 108px;
   }
 
   .tile-title {
-    font-size: 0.8rem;
+    font-size: 0.74rem;
   }
 
   .tile-icon {
     width: 52px;
     height: 52px;
-  }
-
-  .partner-image {
-    width: 200px;
   }
 }
