@@ -2221,7 +2221,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         Welcome to *Daddy Grab Super App*.
 
         Before we continue, here’s the important bit:
-        • This platform will store your data for marketing purposes.
+        • This platform will store your data for marketing and order fulfilment purposes.
         • 18+ only.
 
         Do you agree to continue?
@@ -2248,12 +2248,16 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text("Perfect. We’re opening your selected item now.")
             return await open_catalog_product_by_sku(update.message, context, pending_sku)
         await update.message.reply_text(
-            "You’re all set.\nTap *Let's Go* to enter Daddy Grab.\nOr use *Super App* or *Report Issue* below.",
+            "Consent received.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await update.message.reply_text(
+            "You’re all set.\nTap *Let's Go* to enter Daddy Grab.",
             reply_markup=lets_go_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
         await update.message.reply_text(
-            "Choose *Super App* to continue or *Report Issue* if you need help.",
+            "Or tap *Super App* to continue, or *Report Issue* if you need help.",
             reply_markup=main_menu_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
