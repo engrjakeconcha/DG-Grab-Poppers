@@ -1845,6 +1845,13 @@ def catalogue_redirect_keyboard() -> InlineKeyboardMarkup:
     )
 
 
+def lets_go_keyboard() -> InlineKeyboardMarkup:
+    """Primary start-flow shortcut into Daddy Grab."""
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Let's Go", web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
+    )
+
+
 def report_issue_keyboard() -> InlineKeyboardMarkup:
     """Link users to the hosted report issue page."""
     return InlineKeyboardMarkup(
@@ -1862,16 +1869,16 @@ def admin_tools_keyboard() -> InlineKeyboardMarkup:
 def miniapp_redirect_message(action: str = "continue") -> str:
     """Return consistent redirect copy for storefront actions."""
     if action == "support":
-        return "Need help? Open the Report Issue page below so the team can assist you faster."
+        return "Need help? Open Report Issue below and the Daddy Grab team will assist you there."
     if action == "bulk":
-        return "Bulk orders are handled in the Daddy Grab Mini App. Open it below and send your product list, quantities, and target date."
+        return "Bulk orders are handled inside Daddy Grab. Open it below and send your product list, quantities, and target date."
     if action == "rewards":
-        return "Rewards and referrals now live in the Daddy Grab Mini App. Open it below to check your perks."
+        return "Rewards and referrals are available inside Daddy Grab. Open it below to check your perks."
     if action == "affiliate":
-        return "Affiliate sign-ups are handled in the Daddy Grab Mini App. Open it below and use support chat to get started."
+        return "Affiliate sign-ups are handled inside Daddy Grab. Open it below and use support chat to get started."
     if action == "track":
-        return "Order tracking is available in the Daddy Grab Mini App. Open it below to check your latest order."
-    return "Daddy Grab is your one-stop shop for products and services. Open the Mini App below to browse, order, and get support."
+        return "Order tracking is available inside Daddy Grab. Open it below to check your latest order."
+    return "Daddy Grab is your one-stop shop for products and services. Open it below to browse, order, and get support."
 
 
 def build_catalog_keyboard(products: List[Product]) -> InlineKeyboardMarkup:
@@ -2194,7 +2201,7 @@ async def open_catalog_product_by_sku(
 ) -> int:
     """Redirect deep links to the hosted catalogue experience."""
     await message.reply_text(
-        "Your pick is waiting in the Mini App. Open it below and let the fun begin. 😘",
+        "Your pick is waiting in Daddy Grab. Open it below and let the fun begin. 😘",
         reply_markup=catalogue_redirect_keyboard(),
     )
     return MENU
@@ -2213,12 +2220,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         """
         Welcome to *Daddy Grab Super App*.
 
-Tap the Mini App button below to browse product lines, place orders, and manage support in one place.
-
         Before we continue, here’s the important bit:
-        • This Telegram bot is for disclaimer, redirect, notifications, and broadcast only.
-        • Ordering, tracking, rewards, and checkout happen inside the Mini App.
-        • If you message support here, the team may reply directly on Telegram.
+        • This platform will store your data for marketing purposes.
+        • 18+ only.
 
         Do you agree to continue?
         """
@@ -2244,13 +2248,14 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text("Perfect. We’re opening your selected item now.")
             return await open_catalog_product_by_sku(update.message, context, pending_sku)
         await update.message.reply_text(
-            "You’re all set.\nTap *Super App* to open Daddy Grab.\nTap *Report Issue* if you need customer support.",
-            reply_markup=main_menu_keyboard(),
+            "You’re all set.\nTap *Let's Go* to enter Daddy Grab.\nOr use *Super App* or *Report Issue* below.",
+            reply_markup=lets_go_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
         await update.message.reply_text(
-            "Daddy Grab is ready when you are. Tap below to continue.",
+            "Choose *Super App* to continue or *Report Issue* if you need help.",
             reply_markup=main_menu_keyboard(),
+            parse_mode=ParseMode.MARKDOWN,
         )
         return MENU
     await update.message.reply_text(
