@@ -2252,7 +2252,7 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             reply_markup=ReplyKeyboardRemove(),
         )
         await update.message.reply_text(
-            "You’re all set.\nTap *Let's Go* to enter Daddy Grab.",
+            "Welcome to Daddy Grab Super App, to start your journey click the *Let's Go* button below:",
             reply_markup=lets_go_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
