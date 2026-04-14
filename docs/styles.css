@@ -1,20 +1,21 @@
 :root {
   --white: #ffffff;
-  --dark-green: #153b20;
-  --forest: #21492b;
-  --forest-deep: #102918;
-  --lime: #c8d54a;
-  --mist: #f7faf6;
-  --glass: rgba(255, 255, 255, 0.64);
-  --glass-strong: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.58);
-  --text-main: #18311d;
-  --text-soft: #728173;
+  --dark-green: #2f4b39;
+  --forest: #33513d;
+  --forest-deep: #1d3125;
+  --medium-gray: #c9c7c7;
+  --poppers-mint: #7ef0ce;
+  --mist: #f2f4f1;
+  --glass: rgba(255, 255, 255, 0.18);
+  --glass-strong: rgba(255, 255, 255, 0.24);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --text-main: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.74);
   --radius-xl: 28px;
-  --radius-lg: 20px;
+  --radius-lg: 22px;
   --radius-md: 16px;
-  --shadow-soft: 0 12px 30px rgba(16, 39, 22, 0.08);
-  --shadow-tile: 0 8px 22px rgba(13, 33, 17, 0.08);
+  --shadow-soft: 0 14px 28px rgba(11, 20, 15, 0.26);
+  --shadow-tile: 0 10px 22px rgba(9, 18, 12, 0.28);
 }
 
 * {
@@ -24,8 +25,9 @@
 html {
   min-height: 100%;
   background:
-    radial-gradient(circle at top left, rgba(200, 213, 74, 0.66), transparent 18%),
-    linear-gradient(180deg, var(--dark-green) 0 170px, #ffffff 170px 100%);
+    radial-gradient(circle at top left, rgba(126, 240, 206, 0.14), transparent 22%),
+    radial-gradient(circle at top right, rgba(201, 199, 199, 0.14), transparent 24%),
+    linear-gradient(180deg, #324c3a 0%, #2d4535 100%);
 }
 
 body {
@@ -34,8 +36,8 @@ body {
   font-family: "Manrope", sans-serif;
   color: var(--text-main);
   background:
-    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.12), transparent 18%),
-    linear-gradient(180deg, transparent 0 172px, #ffffff 172px 100%);
+    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.07), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.02));
 }
 
 body.telegram {
@@ -46,93 +48,64 @@ body.telegram {
 .app-shell {
   width: min(100%, 430px);
   margin: 0 auto;
-  padding: 12px 14px 34px;
+  padding: 16px 14px 34px;
 }
 
 .hero-stage {
   position: relative;
-  padding: 8px 0 4px;
+  padding: 2px 0 10px;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 58px;
-  padding: 8px 12px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  min-height: 92px;
+  padding: 14px 16px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
+    linear-gradient(135deg, rgba(126, 240, 206, 0.08), transparent 46%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-soft);
 }
 
 .topbar-logo {
   display: block;
-  width: min(100%, 230px);
-  height: 40px;
+  width: min(100%, 300px);
+  height: 64px;
   object-fit: contain;
   object-position: left center;
 }
 
-.ads-strip {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.ad-card {
-  min-height: 72px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.72));
-  border: 1px solid rgba(24, 60, 31, 0.06);
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-}
-
-.ad-card-wide {
-  background:
-    radial-gradient(circle at top right, rgba(200, 213, 74, 0.28), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.74));
-}
-
-.ad-label,
 .section-kicker {
   margin: 0;
-  font-size: 0.64rem;
-  font-weight: 800;
+  font-size: 0.66rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--forest);
-}
-
-.ad-card strong {
-  font-family: "Sora", sans-serif;
-  font-size: 0.88rem;
-  line-height: 1.15;
+  color: var(--medium-gray);
 }
 
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .service-tile {
-  min-height: 112px;
-  padding: 10px 8px 12px;
+  min-height: 118px;
+  padding: 12px 8px 12px;
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: inherit;
+  color: var(--white);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(248, 251, 248, 0.78));
-  border: 1px solid rgba(24, 60, 31, 0.07);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06)),
+    linear-gradient(180deg, rgba(126, 240, 206, 0.03), transparent 58%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow-tile);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -153,15 +126,16 @@ body.telegram {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 46%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 46%);
   pointer-events: none;
 }
 
 .tile-icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: 18px;
   display: block;
+  box-shadow: 0 8px 14px rgba(9, 18, 12, 0.2);
 }
 
 .tile-title {
@@ -172,6 +146,7 @@ body.telegram {
   letter-spacing: -0.02em;
   line-height: 1.15;
   max-width: 84px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
 .partners-section {
@@ -202,6 +177,7 @@ body.telegram {
   border-radius: 22px;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .partner-image img {
@@ -220,10 +196,6 @@ body.telegram {
 }
 
 @media (max-width: 380px) {
-  .ads-strip {
-    grid-template-columns: 1fr;
-  }
-
   .service-tile {
     min-height: 108px;
   }
@@ -235,5 +207,14 @@ body.telegram {
   .tile-icon {
     width: 52px;
     height: 52px;
+  }
+
+  .topbar {
+    min-height: 82px;
+  }
+
+  .topbar-logo {
+    width: min(100%, 270px);
+    height: 56px;
   }
 }
