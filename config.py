@@ -57,5 +57,5 @@ LOCK_DIR = RUNTIME_ROOT / "locks"
 # Google Service Account (service_account.json contents)
 SERVICE_ACCOUNT_INFO = _parse_service_account(os.getenv("SERVICE_ACCOUNT_INFO_JSON", "")) or {}
 
-START_IMAGE_PATH = os.getenv("START_IMAGE_PATH", "assets/welcome.png").strip()
+START_IMAGE_PATH = os.getenv("START_IMAGE_PATH", "assets/logo.png").strip()
 ORDER_COMPLETE_IMAGE_PATH = os.getenv("ORDER_COMPLETE_IMAGE_PATH", "assets/thankyou.png").strip()
