@@ -4230,7 +4230,7 @@ async def on_bot_added_to_group(update: Update, context: ContextTypes.DEFAULT_TY
             f"👉 <a href=\"https://t.me/{BOT_USERNAME}\">t.me/{BOT_USERNAME}</a>\n\n"
             "Everything you need is just one message away."
         )
-        image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+        image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Assets", "logo.png")
         try:
             with open(image_path, "rb") as photo:
                 await context.bot.send_photo(
