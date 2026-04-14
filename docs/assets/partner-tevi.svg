@@ -1,0 +1,20 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="46" y1="23" x2="386" y2="258" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D66F90"/>
+      <stop offset="1" stop-color="#7B3657"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="94" y1="70" x2="354" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="280" rx="36" fill="url(#bg)"/>
+  <circle cx="353" cy="69" r="55" fill="#FFD6DF" fill-opacity="0.24"/>
+  <circle cx="112" cy="224" r="78" fill="#8D4266" fill-opacity="0.48"/>
+  <rect x="22" y="22" width="396" height="236" rx="28" fill="url(#glow)"/>
+  <text x="38" y="58" fill="#FFF6F8" font-family="DM Sans, Arial, sans-serif" font-size="18" font-weight="700">Partner placement</text>
+  <text x="38" y="112" fill="white" font-family="Nunito, Arial, sans-serif" font-size="54" font-weight="900">TEVI</text>
+  <text x="38" y="154" fill="white" font-family="Nunito, Arial, sans-serif" font-size="30" font-weight="800">Creator commerce spotlight</text>
+  <text x="38" y="192" fill="#FFF1F4" font-family="DM Sans, Arial, sans-serif" font-size="21">Short-form funnels, content drops, and offers</text>
+</svg>

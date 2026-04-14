@@ -6,12 +6,12 @@
     <title>Daddy Grab Super App</title>
     <meta
       name="description"
-      content="Daddy Grab Super App landing page for buyers, bookings, events, channels, support, and order tracking."
+      content="Daddy Grab Super App mobile jump page for buyers, support, channels, bookings, events, and partner links."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -19,112 +19,77 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero-card">
-        <div class="hero-top">
+      <section class="hero-shell">
+        <div class="hero-badge">Daddy Grab Super App</div>
+        <div class="hero-logo-wrap">
           <img class="hero-logo" src="./assets/logo.png" alt="Daddy Grab logo" />
-          <div class="hero-copy">
-            <p class="eyebrow">Daddy Grab Super App</p>
-            <h1 id="greeting">Your next stop starts here.</h1>
-            <p class="hero-text">
-              A jump page built for serious buyers, returning customers, and partner traffic. Pick the lane you need,
-              then continue into the right Daddy Grab experience.
-            </p>
-          </div>
         </div>
-
-        <div class="hero-pills">
-          <span class="hero-pill hero-pill-primary">Buyer-first routing</span>
-          <span class="hero-pill">Mobile-first flow</span>
-          <span class="hero-pill">Telegram-friendly</span>
-        </div>
+        <h1 id="greeting">Pick your next stop.</h1>
       </section>
 
-      <section class="quick-filter">
-        <div>
-          <p class="section-kicker">Start Here</p>
-          <h2>Choose the right path</h2>
-        </div>
-        <p class="section-note">
-          The storefront is for actual buyers. This jump page helps route casual visitors, partners, support concerns,
-          and event traffic to the right place first.
-        </p>
-      </section>
-
-      <section class="tile-grid" aria-label="Daddy Grab services">
-        <a class="service-tile tile-shop" href="https://daddygrab.online/store" data-telegram="true">
-          <span class="tile-icon">🛍️</span>
+      <section class="tile-grid" aria-label="Daddy Grab destinations">
+        <a class="service-tile" href="https://daddygrab.online/store" data-telegram="true">
+          <span class="tile-icon tile-green">🛍️</span>
           <span class="tile-title">One Stop Shop</span>
-          <span class="tile-subtitle">Poppers, lubricants, and more</span>
         </a>
 
-        <a class="service-tile tile-book" href="https://daddygrab.online/book" data-telegram="true">
-          <span class="tile-icon">📅</span>
+        <a class="service-tile" href="https://daddygrab.online/book" data-telegram="true">
+          <span class="tile-icon tile-mint">📅</span>
           <span class="tile-title">Book me!</span>
-          <span class="tile-subtitle">Scheduling and reservations</span>
         </a>
 
-        <a class="service-tile tile-events" href="https://daddygrab.online/events" data-telegram="true">
-          <span class="tile-icon">🎟️</span>
+        <a class="service-tile" href="https://daddygrab.online/events" data-telegram="true">
+          <span class="tile-icon tile-gold">🎟️</span>
           <span class="tile-title">Our Events!</span>
-          <span class="tile-subtitle">Postings and enlistment</span>
         </a>
 
-        <a class="service-tile tile-channels" href="https://daddygrab.online/channels" data-telegram="true">
-          <span class="tile-icon">📣</span>
+        <a class="service-tile" href="https://daddygrab.online/channels" data-telegram="true">
+          <span class="tile-icon tile-sage">📣</span>
           <span class="tile-title">Channels</span>
-          <span class="tile-subtitle">Telegram communities</span>
         </a>
 
-        <a class="service-tile tile-support" href="https://daddygrab.online/report" data-telegram="true">
-          <span class="tile-icon">🛟</span>
+        <a class="service-tile" href="https://daddygrab.online/report" data-telegram="true">
+          <span class="tile-icon tile-coral">🛟</span>
           <span class="tile-title">Report Issue</span>
-          <span class="tile-subtitle">Customer service and AI agent</span>
         </a>
 
-        <a class="service-tile tile-track" href="https://daddygrab.online/track" data-telegram="true">
-          <span class="tile-icon">📦</span>
+        <a class="service-tile" href="https://daddygrab.online/track" data-telegram="true">
+          <span class="tile-icon tile-soft">📦</span>
           <span class="tile-title">Track my Order</span>
-          <span class="tile-subtitle">Delivery and order updates</span>
+        </a>
+
+        <a class="service-tile" href="https://x.com" data-telegram="true">
+          <span class="tile-icon tile-dark">𝕏</span>
+          <span class="tile-title">X</span>
+        </a>
+
+        <a class="service-tile" href="https://tevi.com" data-telegram="true">
+          <span class="tile-icon tile-rose">TV</span>
+          <span class="tile-title">Tevi</span>
+        </a>
+
+        <a class="service-tile" href="https://jff.com" data-telegram="true">
+          <span class="tile-icon tile-sun">JF</span>
+          <span class="tile-title">JFF</span>
         </a>
       </section>
 
       <section class="partners-section">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">Partner Placements</p>
-            <h2>Here’s our partners</h2>
+        <div class="section-head">
+          <p class="section-kicker">Partner Placements</p>
+          <h2>Here’s our partners</h2>
+        </div>
+
+        <div class="partner-marquee" aria-label="Scrolling partner placements">
+          <div class="partner-track">
+            <a class="partner-image" href="https://x.com"><img src="./assets/partner-x.svg" alt="X partner mock" /></a>
+            <a class="partner-image" href="https://tevi.com"><img src="./assets/partner-tevi.svg" alt="Tevi partner mock" /></a>
+            <a class="partner-image" href="https://jff.com"><img src="./assets/partner-jff.svg" alt="JFF partner mock" /></a>
+            <a class="partner-image" href="https://x.com"><img src="./assets/partner-x.svg" alt="X partner mock duplicate" /></a>
+            <a class="partner-image" href="https://tevi.com"><img src="./assets/partner-tevi.svg" alt="Tevi partner mock duplicate" /></a>
+            <a class="partner-image" href="https://jff.com"><img src="./assets/partner-jff.svg" alt="JFF partner mock duplicate" /></a>
           </div>
-          <a class="section-link" href="https://daddygrab.online/partners">View all</a>
         </div>
-
-        <div class="partner-scroll" aria-label="Partner brand placeholders">
-          <a class="partner-card partner-card-sunset" href="https://daddygrab.online/partners/brand-1">
-            <span class="partner-tag">Partner Ad</span>
-            <strong>Partner Brand One</strong>
-            <span>Featured launch placement for promos, menus, or lead generation.</span>
-          </a>
-
-          <a class="partner-card partner-card-lime" href="https://daddygrab.online/partners/brand-2">
-            <span class="partner-tag">Partner Ad</span>
-            <strong>Partner Brand Two</strong>
-            <span>Use this block for events, pop-ups, featured collections, or offers.</span>
-          </a>
-
-          <a class="partner-card partner-card-night" href="https://daddygrab.online/partners/brand-3">
-            <span class="partner-tag">Partner Ad</span>
-            <strong>Partner Brand Three</strong>
-            <span>Reserved space for rotating campaigns and high-intent traffic routing.</span>
-          </a>
-        </div>
-      </section>
-
-      <section class="notice-card">
-        <p class="section-kicker">Storefront Filter</p>
-        <h2>Made to qualify traffic before checkout</h2>
-        <p>
-          People who tap into the One Stop Shop are showing buying intent. Everyone else can go to support, content,
-          events, or channels without cluttering the core storefront journey.
-        </p>
       </section>
     </main>
 

@@ -1,0 +1,20 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="49" y1="19" x2="392" y2="257" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4D857"/>
+      <stop offset="1" stop-color="#6F7D1E"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="67" y1="34" x2="297" y2="186" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="280" rx="36" fill="url(#bg)"/>
+  <circle cx="360" cy="66" r="56" fill="#EEF4BF" fill-opacity="0.28"/>
+  <circle cx="92" cy="218" r="86" fill="#4D5B17" fill-opacity="0.3"/>
+  <rect x="22" y="22" width="396" height="236" rx="28" fill="url(#glass)"/>
+  <text x="38" y="58" fill="#324114" font-family="DM Sans, Arial, sans-serif" font-size="18" font-weight="700">Partner placement</text>
+  <text x="38" y="112" fill="#23310C" font-family="Nunito, Arial, sans-serif" font-size="60" font-weight="900">JFF</text>
+  <text x="38" y="154" fill="#23310C" font-family="Nunito, Arial, sans-serif" font-size="30" font-weight="800">Feature and event traffic</text>
+  <text x="38" y="192" fill="#334213" font-family="DM Sans, Arial, sans-serif" font-size="21">Promos, community moments, and conversion paths</text>
+</svg>

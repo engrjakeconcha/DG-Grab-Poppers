@@ -1,0 +1,20 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="38" y1="24" x2="394" y2="261" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#253228"/>
+      <stop offset="1" stop-color="#060807"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="62" y1="34" x2="283" y2="167" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="280" rx="36" fill="url(#bg)"/>
+  <circle cx="362" cy="66" r="52" fill="#C7D94B" fill-opacity="0.18"/>
+  <circle cx="99" cy="214" r="84" fill="#1F5730" fill-opacity="0.55"/>
+  <rect x="22" y="22" width="396" height="236" rx="28" fill="url(#shine)"/>
+  <text x="38" y="58" fill="#C7D94B" font-family="DM Sans, Arial, sans-serif" font-size="18" font-weight="700">Partner placement</text>
+  <text x="38" y="116" fill="white" font-family="Nunito, Arial, sans-serif" font-size="76" font-weight="900">𝕏</text>
+  <text x="38" y="156" fill="white" font-family="Nunito, Arial, sans-serif" font-size="30" font-weight="800">X on Daddy Grab</text>
+  <text x="38" y="192" fill="#E5ECE7" font-family="DM Sans, Arial, sans-serif" font-size="21">Launches, drops, and community traffic</text>
+</svg>
