@@ -59,9 +59,10 @@ body.telegram {
 .topbar {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  min-height: 92px;
-  padding: 14px 16px;
+  min-height: 118px;
+  padding: 12px 10px;
   border-radius: 28px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
@@ -77,7 +78,12 @@ body.telegram {
   width: min(100%, 300px);
   height: 64px;
   object-fit: contain;
-  object-position: left center;
+  object-position: center;
+}
+
+.topbar-logo-hero {
+  width: min(100%, 360px);
+  height: 104px;
 }
 
 .section-kicker {
@@ -98,7 +104,7 @@ body.telegram {
 
 .service-tile {
   min-height: 118px;
-  padding: 12px 8px 12px;
+  padding: 8px 6px 10px;
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--text-main);
@@ -139,11 +145,21 @@ body.telegram {
 }
 
 .tile-icon-art {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
   object-fit: cover;
   box-shadow: 0 8px 14px rgba(9, 18, 12, 0.14);
+  margin-top: -2px;
+}
+
+.tile-icon-brand {
+  width: 82px;
+  height: 82px;
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow: 0 8px 14px rgba(9, 18, 12, 0.14);
+  margin-top: -1px;
 }
 
 .tile-title {
@@ -217,16 +233,26 @@ body.telegram {
   }
 
   .tile-icon-art {
-    width: 66px;
-    height: 66px;
+    width: 74px;
+    height: 74px;
+  }
+
+  .tile-icon-brand {
+    width: 72px;
+    height: 72px;
   }
 
   .topbar {
-    min-height: 82px;
+    min-height: 106px;
   }
 
   .topbar-logo {
     width: min(100%, 270px);
     height: 56px;
+  }
+
+  .topbar-logo-hero {
+    width: min(100%, 320px);
+    height: 92px;
   }
 }
