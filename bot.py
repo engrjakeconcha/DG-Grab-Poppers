@@ -301,33 +301,16 @@ class InstanceLock:
 MEMBER_CAPTURE_THROTTLE_SECONDS = 300
 
 PUBLIC_COMMANDS = [
-    BotCommand("start", "Start bot"),
+    BotCommand("start", "Open Daddy Grab"),
     BotCommand("help", "Show help"),
     BotCommand("cancel", "Cancel current flow"),
-    BotCommand("rewards", "Loyalty points and referral link"),
-    BotCommand("received", "Confirm order received"),
 ]
 
 ADMIN_COMMANDS = [
     BotCommand("admin", "Open admin console"),
-    BotCommand("setup", "Setup/repair sheets"),
     BotCommand("status", "Bot status"),
-    BotCommand("pending_orders", "Show pending orders"),
-    BotCommand("send_tracking", "Guided tracking sender"),
-    BotCommand("send_tracking_link", "Send tracking link by order ID"),
-    BotCommand("payment_queue", "Payment verification queue"),
-    BotCommand("sales_dashboard", "Sales KPI snapshot"),
     BotCommand("broadcast", "Broadcast to users"),
-    BotCommand("broadcast_groups", "Broadcast to groups"),
-    BotCommand("broadcast_channels", "Broadcast to channels"),
-    BotCommand("broadcast_group_members", "Broadcast to captured group members"),
-    BotCommand("export_users", "Export users CSV"),
-    BotCommand("export_groups", "Export groups CSV"),
-    BotCommand("export_channels", "Export channels CSV"),
-    BotCommand("export_group_members", "Export group members CSV"),
-    BotCommand("update_status", "Update order status"),
     BotCommand("reply", "Reply to user"),
-    BotCommand("rollback", "Rollback latest order status"),
 ]
 
 ORDER_HEADERS = [
@@ -1458,6 +1441,73 @@ async def get_sheets(context: ContextTypes.DEFAULT_TYPE) -> SheetsClient:
     return context.application.bot_data["sheets"]
 
 
+async def safe_get_sheets(context: ContextTypes.DEFAULT_TYPE) -> Optional[SheetsClient]:
+    """Best-effort Sheets access for non-critical flows like /start."""
+    try:
+        return await get_sheets(context)
+    except Exception as exc:
+        logger.warning("Sheets unavailable for non-critical flow: %s", exc)
+        return None
+
+
+def register_private_user(context: ContextTypes.DEFAULT_TYPE, user, chat_id: int) -> None:
+    """Persist a lightweight local registry for broadcasts and admin replies."""
+    if not user:
+        return
+    context.user_data["_profile"] = {
+        "chat_id": chat_id,
+        "user_id": user.id,
+        "username": user.username or "",
+        "full_name": user.full_name,
+        "last_seen_at": dt.datetime.utcnow().isoformat(),
+    }
+
+
+def iter_known_private_targets(context: ContextTypes.DEFAULT_TYPE) -> List[Dict[str, Any]]:
+    """Return known private chat targets from JSON persistence."""
+    targets: List[Dict[str, Any]] = []
+    for user_id, payload in context.application.user_data.items():
+        if not isinstance(payload, dict):
+            continue
+        profile = payload.get("_profile")
+        if not isinstance(profile, dict):
+            continue
+        chat_id = profile.get("chat_id")
+        if not str(chat_id or "").lstrip("-").isdigit():
+            continue
+        targets.append(
+            {
+                "user_id": user_id,
+                "chat_id": int(chat_id),
+                "username": str(profile.get("username", "")),
+                "full_name": str(profile.get("full_name", "")),
+            }
+        )
+    return targets
+
+
+async def notify_admin_support_request(update: Update, context: ContextTypes.DEFAULT_TYPE, reason: str) -> None:
+    """Send a simple support notification to the admin group."""
+    user = update.effective_user
+    chat = update.effective_chat
+    if not user or not chat:
+        return
+    lines = [
+        "New customer request",
+        f"Reason: {reason}",
+        f"User: {user.full_name}",
+        f"Username: @{user.username}" if user.username else "Username: -",
+        f"Telegram ID: {user.id}",
+        f"Chat ID: {chat.id}",
+        "",
+        "Use /reply USER_ID your message to respond.",
+    ]
+    try:
+        await context.bot.send_message(chat_id=ADMIN_GROUP_ID, text="\n".join(lines))
+    except Exception as exc:
+        logger.warning("Failed to notify admin group: %s", exc)
+
+
 def _safe_json(data: Any) -> str:
     try:
         return json.dumps(data, ensure_ascii=False)
@@ -1726,9 +1776,9 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
     """Build the main menu keyboard."""
     return ReplyKeyboardMarkup(
         [
-            ["🛍️ Catalogue", "🔎 Track Order"],
+            ["🛍️ Open Mini App", "🔎 Track Order"],
             ["💬 Contact Admin", "📦 Bulk Orders"],
-            ["🎁 Refer a Friend", "🤝 Affiliate Enrollment"],
+            ["🎁 Rewards", "🤝 Affiliate"],
         ],
         resize_keyboard=True,
     )
@@ -2145,18 +2195,11 @@ async def open_catalog_product_by_sku(
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Entry point: show privacy disclaimer and ask consent."""
     user = update.effective_user
-    sheets = await get_sheets(context)
-    await asyncio.to_thread(sheets.upsert_user, user.id, user.username or "", user.full_name)
+    register_private_user(context, user, update.effective_chat.id)
     # Referral entry via /start ref_123456789
     if context.args:
         token = str(context.args[0]).strip().lower()
-        if token.startswith("ref_"):
-            rid = token.replace("ref_", "", 1)
-            if rid.isdigit() and int(rid) != user.id:
-                applied = await asyncio.to_thread(sheets.set_referrer, user.id, int(rid))
-                if applied:
-                    await update.message.reply_text("Referral applied. You can start earning loyalty rewards. 🎁")
-        elif token.startswith("catalog_"):
+        if token.startswith("catalog_"):
             context.user_data["pending_catalog_sku"] = token.replace("catalog_", "", 1).upper()
     text = textwrap.dedent(
         """
@@ -2165,9 +2208,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 Tap the Mini App button below to browse product lines, place orders, and manage support in one place.
 
         Before we continue, here’s the important bit:
-        • We store order details and delivery info for fulfillment.
-        • Payment proof images are kept for verification.
-        • You can request deletion anytime.
+        • This Telegram bot is for disclaimer, redirect, notifications, and broadcast only.
+        • Ordering, tracking, rewards, and checkout happen inside the Mini App.
+        • If you message support here, the team may reply directly on Telegram.
 
         Do you agree to continue?
         """
@@ -2185,6 +2228,7 @@ Tap the Mini App button below to browse product lines, place orders, and manage 
 
 async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle consent response."""
+    register_private_user(context, update.effective_user, update.effective_chat.id)
     choice = update.message.text.strip().lower()
     if "yes" in choice:
         pending_sku = context.user_data.pop("pending_catalog_sku", "")
@@ -2209,8 +2253,9 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Route main menu selections."""
+    register_private_user(context, update.effective_user, update.effective_chat.id)
     text = update.message.text.strip()
-    if "Catalogue" in text or "Ordering" in text:
+    if "Mini App" in text or "Catalogue" in text or "Ordering" in text:
         return await ordering_start(update, context)
     if "Track Order" in text:
         await update.message.reply_text(
@@ -2219,8 +2264,9 @@ async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         )
         return MENU
     if "Contact Admin" in text or "Customer Service" in text:
+        await notify_admin_support_request(update, context, "Contact Admin")
         await update.message.reply_text(
-            miniapp_redirect_message("support"),
+            "The admin team has been notified. You can also continue in the Mini App below.",
             reply_markup=catalogue_redirect_keyboard(),
         )
         return MENU
@@ -3373,20 +3419,19 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if is_admin(update.effective_user.id):
         text = (
             "Admin Help 🔧\n"
-            "• /start — open the Mini App\n"
+            "• /start — open the customer disclaimer flow\n"
             "• /cancel — cancel current flow\n"
-            "• /rewards — loyalty points and referral link\n\n"
-            "Admin Controls\n"
             "• /admin — open the hosted admin dashboard\n"
-            "• /setup — setup/repair sheets\n"
-            "• /status — bot status"
+            "• /status — bot status\n"
+            "• /broadcast — send a broadcast to known Telegram users\n"
+            "• /reply USER_ID message — send a direct support reply"
         )
         await update.message.reply_text(text)
     else:
         text = (
-            "Everything customer-facing now happens in the Mini App. 😈\n"
+            "Daddy Grab on Telegram is here to guide you into the Mini App.\n"
             "• Orders, tracking, rewards, and referrals are all handled there\n"
-            "• For help or bulk orders, open the Mini App and use the chat support\n"
+            "• For help or bulk orders, open the Mini App or tap Contact Admin here\n"
             "• Send /start anytime to get back to the main menu"
         )
         await update.message.reply_text(text, reply_markup=catalogue_redirect_keyboard())
@@ -3444,28 +3489,9 @@ async def sales_dashboard_command(update: Update, context: ContextTypes.DEFAULT_
 
 async def rewards_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Show loyalty and referral details for current user."""
-    if not is_admin(update.effective_user.id):
-        await update.message.reply_text(
-            miniapp_redirect_message("rewards"),
-            reply_markup=catalogue_redirect_keyboard(),
-        )
-        return
-    sheets = await get_sheets(context)
-    uid = update.effective_user.id
-    balance = await asyncio.to_thread(sheets.get_loyalty_balance, uid)
-    reward_points_used, reward_discount = compute_reward_redemption(balance, 10_000_000)
-    referral_link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
     await update.message.reply_text(
-        "\n".join(
-            [
-                f"Your loyalty balance: {balance} pts 🎁",
-                f"Your referral link: {referral_link}",
-                f"Auto-redeem ready now: {reward_points_used} pts = ₱{reward_discount:.2f}",
-                "",
-                PROMO_TERMS_TEXT,
-            ]
-        ),
-        reply_markup=referral_share_keyboard(uid),
+        miniapp_redirect_message("rewards"),
+        reply_markup=catalogue_redirect_keyboard(),
     )
 
 
@@ -3510,94 +3536,12 @@ async def rollback_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def setup_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Admin: create or repair all sheet headers."""
+    """Admin setup command for Telegram-only mode."""
     if not is_admin(update.effective_user.id):
         await update.message.reply_text("Admins only.")
         return
-
-    sheets = await get_sheets(context)
-    specs = {
-        "Products": ["sku", "category", "name", "description", "price", "image_url", "active", "stock"],
-        "Promos": ["code", "discount", "active"],
-        "Users": [
-            "user_id",
-            "username",
-            "full_name",
-            "last_delivery_name",
-            "last_delivery_address",
-            "last_delivery_contact",
-            "last_delivery_area",
-            "updated_at",
-        ],
-        "Orders": [
-            "order_id",
-            "created_at",
-            "user_id",
-            "username",
-            "full_name",
-            "items_json",
-            "subtotal",
-            "discount",
-            "shipping",
-            "total",
-            "delivery_name",
-            "delivery_address",
-            "delivery_contact",
-            "delivery_area",
-            "payment_method",
-            "payment_proof_file_id",
-            "status",
-            "tracking_number",
-        ],
-        "Tickets": ["ticket_id", "created_at", "type", "user_id", "username", "message", "status"],
-        "Affiliates": ["created_at", "user_id", "username", "twitter_or_telegram", "email", "contact", "subscriber_count"],
-        "BroadcastLog": ["created_at", "admin_id", "message", "photo_file_id", "sent_count"],
-        "Groups": ["chat_id", "title", "chat_type", "updated_at"],
-        "Channels": ["chat_id", "title", "updated_at"],
-        "GroupMembers": ["group_id", "group_title", "user_id", "username", "full_name", "status", "updated_at"],
-        "AuditLog": ["created_at", "action", "actor_id", "target_type", "target_id", "before_json", "after_json", "notes"],
-        "LoyaltyLedger": ["created_at", "user_id", "points_delta", "reason", "order_id"],
-        "Referrals": ["user_id", "referrer_id", "created_at"],
-        "PointsSummary": [
-            "user_id",
-            "current_points",
-            "earned_points",
-            "redeemed_points",
-            "restored_points",
-            "order_reward_count",
-            "referral_reward_count",
-            "updated_at",
-        ],
-        "ReferralSummary": [
-            "referrer_id",
-            "referred_user_id",
-            "created_at",
-            "status",
-            "reward_points",
-            "rewarded_at",
-            "reward_order_id",
-            "updated_at",
-        ],
-    }
-
-    repaired = []
-    repaired_order_rows = 0
-    for title, headers in specs.items():
-        ws = await asyncio.to_thread(sheets._get_or_create_ws, title, headers)
-        # Write headers to row 1 to normalize
-        await asyncio.to_thread(ws.update, "A1", [headers])
-        repaired.append(title)
-        if title == "Orders":
-            repaired_order_rows = await asyncio.to_thread(sheets.repair_orders_sheet)
-    await asyncio.to_thread(sheets.rebuild_rewards_summaries)
-
     await sync_bot_commands(context)
-    await update.message.reply_text(
-        f"Setup complete. Updated headers for: {', '.join(repaired)}\n"
-        f"Orders rows normalized: {repaired_order_rows}\n"
-        "Rewards summaries rebuilt: PointsSummary, ReferralSummary\n"
-        "Bot commands synced: public commands are user-only; admin commands are scoped to admin accounts."
-    )
+    await update.message.reply_text("Telegram-only mode is active. No sheets or external DB are used by this bot.")
 
 
 async def sync_bot_commands(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -3920,70 +3864,39 @@ async def _perform_broadcast(
     message_text: str,
     photo_id: Optional[str],
 ) -> int:
-    """Send broadcast to all users and log it."""
-    sheets = await get_sheets(context)
-    users_ws = await asyncio.to_thread(
-        sheets._get_or_create_ws,
-        "Users",
-        [
-            "user_id",
-            "username",
-            "full_name",
-            "last_delivery_name",
-            "last_delivery_address",
-            "last_delivery_contact",
-            "last_delivery_area",
-            "updated_at",
-        ],
-    )
-    users = sheets._safe_get_all_records(
-        users_ws,
-        [
-            "user_id",
-            "username",
-            "full_name",
-            "last_delivery_name",
-            "last_delivery_address",
-            "last_delivery_contact",
-            "last_delivery_area",
-            "updated_at",
-        ],
-    )
+    """Send broadcast to all locally known private users."""
+    users = iter_known_private_targets(context)
     order_now_button = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Order Now", url=f"https://t.me/{BOT_USERNAME}")]]
+        [[InlineKeyboardButton("Open Daddy Grab", web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
     )
     sent_count = 0
     for row in users:
-        user_id = row.get("user_id")
-        if not user_id:
-            continue
+        chat_id = row.get("chat_id")
         try:
             if photo_id:
                 await context.bot.send_photo(
-                    chat_id=int(user_id),
+                    chat_id=int(chat_id),
                     photo=photo_id,
                     caption=message_text,
                     reply_markup=order_now_button,
                 )
             else:
                 await context.bot.send_message(
-                    chat_id=int(user_id),
+                    chat_id=int(chat_id),
                     text=message_text,
                     reply_markup=order_now_button,
                 )
             sent_count += 1
         except Exception as exc:
-            logger.warning("Failed to broadcast to %s: %s", user_id, exc)
+            logger.warning("Failed to broadcast to %s: %s", chat_id, exc)
 
-    await asyncio.to_thread(
-        sheets.log_broadcast,
-        {
-            "admin_id": admin_id,
-            "message": message_text,
-            "photo_file_id": photo_id or "",
-            "sent_count": sent_count,
-        },
-    )
+    try:
+        await context.bot.send_message(
+            chat_id=ADMIN_GROUP_ID,
+            text=f"Broadcast completed by {admin_id}. Delivered to {sent_count} known users.",
+        )
+    except Exception as exc:
+        logger.warning("Failed to send broadcast summary to admin group: %s", exc)
     return sent_count
 
 
@@ -4051,7 +3964,17 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not is_admin(update.effective_user.id):
         await update.message.reply_text("Admins only.")
         return
-    await update.message.reply_text("Bot is running normally.")
+    targets = iter_known_private_targets(context)
+    await update.message.reply_text(
+        "\n".join(
+            [
+                "Daddy Grab bot is running.",
+                "Mode: Telegram redirect + notifications only",
+                f"Known private users: {len(targets)}",
+                f"Admin group: {ADMIN_GROUP_ID}",
+            ]
+        )
+    )
 
 
 async def update_status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -4109,7 +4032,7 @@ async def reply_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     user_id = int(parts[1])
     message = parts[2]
-    await context.bot.send_message(chat_id=user_id, text=f"Admin: {message}")
+    await context.bot.send_message(chat_id=user_id, text=f"Daddy Grab Support:\n{message}")
     await update.message.reply_text("Message sent.")
 
 
@@ -4434,6 +4357,10 @@ async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def on_startup(app: Application) -> None:
     """Notify admin group when bot process is live."""
     try:
+        await sync_bot_commands(type("StartupContext", (), {"bot": app.bot})())
+    except Exception as exc:
+        logger.warning("Failed to sync startup commands: %s", exc)
+    try:
         await app.bot.send_message(
             chat_id=ADMIN_GROUP_ID,
             text=f"{STORE_NAME} bot is now live. ✅",
@@ -4458,7 +4385,6 @@ def build_application() -> Application:
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("broadcast", broadcast_command),
-            CommandHandler("send_tracking", send_tracking_command),
         ],
         name="daddygrab_main_conversation",
         persistent=True,
@@ -4466,79 +4392,19 @@ def build_application() -> Application:
         states={
             CONSENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, consent)],
             MENU: [MessageHandler(filters.TEXT & ~filters.COMMAND, menu_router)],
-            ORDERING: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, ordering_router),
-                CallbackQueryHandler(catalog_callback),
-            ],
-            DELIVERY_AREA: [MessageHandler(filters.TEXT & ~filters.COMMAND, delivery_area)],
-            DELIVERY_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, delivery_name)],
-            DELIVERY_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, delivery_address)],
-            DELIVERY_CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, delivery_contact)],
-            PROMO_CODE: [MessageHandler(filters.TEXT & ~filters.COMMAND, promo_code)],
-            PAYMENT_METHOD: [MessageHandler(filters.TEXT & ~filters.COMMAND, payment_method)],
-            PAYMENT_PROOF: [
-                MessageHandler(filters.PHOTO | filters.Document.IMAGE | (filters.TEXT & ~filters.COMMAND), payment_proof)
-            ],
-            TRACK_CHOICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, track_choice)],
-            TRACK_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, track_input)],
-            CS_FORM: [MessageHandler(filters.TEXT & ~filters.COMMAND, customer_service_form)],
-            BULK_FORM: [MessageHandler(filters.TEXT & ~filters.COMMAND, bulk_order_form)],
-            AFFILIATE_TWITTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, affiliate_twitter)],
-            AFFILIATE_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, affiliate_email)],
-            AFFILIATE_CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, affiliate_contact)],
-            AFFILIATE_SUBS: [MessageHandler(filters.TEXT & ~filters.COMMAND, affiliate_subs)],
             BROADCAST_MESSAGE: [MessageHandler(filters.ALL & ~filters.COMMAND, broadcast_message)],
             BROADCAST_PREVIEW: [CallbackQueryHandler(broadcast_preview_action, pattern=r"^bcast_")],
-            CUSTOM_QTY: [MessageHandler(filters.TEXT & ~filters.COMMAND, custom_qty)],
-            TRACKING_SELECT: [CallbackQueryHandler(tracking_select_callback, pattern=r"^tracksel:")],
-            TRACKING_LINK: [MessageHandler(filters.TEXT & ~filters.COMMAND, tracking_link_input)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
 
-    app.add_handler(
-        MessageHandler(
-            filters.ChatType.PRIVATE
-            & filters.REPLY
-            & (filters.TEXT | filters.PHOTO | filters.Document.ALL)
-            & ~filters.COMMAND,
-            customer_thread_reply_router,
-        ),
-        group=-1,
-    )
     app.add_handler(conv)
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("setup", setup_command))
-    app.add_handler(CommandHandler("received", received_command))
-    app.add_handler(CommandHandler("update_status", update_status_command))
     app.add_handler(CommandHandler("reply", reply_command))
-    app.add_handler(CommandHandler("payment_queue", payment_queue_alias))
-    app.add_handler(CommandHandler("sales_dashboard", sales_dashboard_command))
     app.add_handler(CommandHandler("rewards", rewards_command))
-    app.add_handler(CommandHandler("rollback", rollback_command))
     app.add_handler(CommandHandler("admin", admin_panel_command))
-    app.add_handler(CommandHandler("pending_orders", pending_orders_command))
-    app.add_handler(CommandHandler("send_tracking_link", send_tracking_link_command))
-    app.add_handler(CommandHandler("broadcast_groups", broadcast_groups_command))
-    app.add_handler(CommandHandler("broadcast_channels", broadcast_channels_command))
-    app.add_handler(CommandHandler("broadcast_group_members", broadcast_group_members_command))
-    app.add_handler(CommandHandler("export_users", export_users_command))
-    app.add_handler(CommandHandler("export_groups", export_groups_command))
-    app.add_handler(CommandHandler("export_channels", export_channels_command))
-    app.add_handler(CommandHandler("export_group_members", export_group_members_command))
-    app.add_handler(CallbackQueryHandler(admin_order_action, pattern=r"^admin_(confirm|reject):"))
-    app.add_handler(CallbackQueryHandler(payment_verify_action, pattern=r"^payverify_(approve|reject):"))
-    app.add_handler(CallbackQueryHandler(customer_received, pattern=r"^cust_received:"))
-    app.add_handler(CallbackQueryHandler(admin_delivered, pattern=r"^admin_delivered:"))
-    app.add_handler(MessageHandler(filters.Chat(chat_id=ADMIN_GROUP_ID) & filters.REPLY & filters.TEXT & ~filters.COMMAND, admin_group_reply_router))
-    app.add_handler(CallbackQueryHandler(admin_panel_callback, pattern=r"^adminpanel:"))
-    app.add_handler(CallbackQueryHandler(admin_pending_order_callback, pattern=r"^adminpo:"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, admin_followup_input))
-    app.add_handler(ChatMemberHandler(on_bot_added_to_group, ChatMemberHandler.MY_CHAT_MEMBER))
-    app.add_handler(ChatMemberHandler(on_group_member_update, ChatMemberHandler.CHAT_MEMBER))
-    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_chat_members))
-    app.add_handler(MessageHandler(filters.ChatType.GROUPS & filters.ALL, capture_group_message_user))
     app.add_error_handler(on_error)
 
     return app
