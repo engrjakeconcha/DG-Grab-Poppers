@@ -24,10 +24,7 @@
 
 html {
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(126, 240, 206, 0.14), transparent 22%),
-    radial-gradient(circle at top right, rgba(201, 199, 199, 0.14), transparent 24%),
-    linear-gradient(180deg, #324c3a 0%, #2d4535 100%);
+  background: var(--dark-green);
 }
 
 body {
@@ -35,9 +32,7 @@ body {
   min-height: 100vh;
   font-family: "Manrope", sans-serif;
   color: var(--text-main);
-  background:
-    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.07), transparent 18%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.02));
+  background: var(--dark-green);
 }
 
 body.telegram {
@@ -48,12 +43,12 @@ body.telegram {
 .app-shell {
   width: min(100%, 430px);
   margin: 0 auto;
-  padding: 16px 14px 34px;
+  padding: 16px 14px 18px;
 }
 
 .hero-stage {
   position: relative;
-  padding: 2px 0 10px;
+  padding: 2px 0 0;
 }
 
 .topbar {
@@ -96,32 +91,34 @@ body.telegram {
   color: var(--medium-gray);
 }
 
+.tiles-body {
+  margin-top: 0;
+  padding: 16px 0 18px;
+  background: var(--white);
+  border-radius: 0;
+}
+
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .service-tile {
   min-height: 118px;
-  padding: 26px 6px 10px;
+  padding: 20px 4px 4px;
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--text-main);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 248, 244, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.64);
-  box-shadow:
-    0 10px 0 rgba(22, 46, 29, 0.34),
-    0 18px 26px rgba(8, 17, 11, 0.18);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  color: var(--white);
+  background: var(--forest);
+  border: 1px solid rgba(17, 39, 29, 0.28);
+  box-shadow: 0 8px 18px rgba(12, 28, 19, 0.14);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 0;
   position: relative;
   overflow: hidden;
 }
@@ -134,7 +131,7 @@ body.telegram {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 46%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 46%);
   pointer-events: none;
 }
 
@@ -166,35 +163,28 @@ body.telegram {
 }
 
 .tile-icon-art {
-  width: 84px;
-  height: 84px;
-  border-radius: 22px;
+  width: calc(100% - 8px);
+  height: calc(100% - 24px);
+  min-height: 88px;
+  border-radius: 18px;
   object-fit: cover;
-  box-shadow: 0 8px 14px rgba(9, 18, 12, 0.14);
-  margin-top: -2px;
+  box-shadow: none;
+  margin-top: 0;
 }
 
 .tile-icon-brand {
-  width: 82px;
-  height: 82px;
-  border-radius: 22px;
+  width: calc(100% - 12px);
+  height: calc(100% - 28px);
+  min-height: 84px;
+  border-radius: 18px;
   object-fit: cover;
-  box-shadow: 0 8px 14px rgba(9, 18, 12, 0.14);
-  margin-top: -1px;
-}
-
-.tile-title {
-  text-align: center;
-  font-family: "Sora", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  max-width: 84px;
+  box-shadow: none;
+  margin-top: 0;
 }
 
 .partners-section {
-  margin-top: 24px;
+  margin-top: 0;
+  padding-top: 16px;
 }
 
 .section-head {
@@ -242,11 +232,7 @@ body.telegram {
 @media (max-width: 380px) {
   .service-tile {
     min-height: 108px;
-    padding-top: 24px;
-  }
-
-  .tile-title {
-    font-size: 0.74rem;
+    padding: 20px 4px 4px;
   }
 
   .tile-icon {
@@ -255,13 +241,15 @@ body.telegram {
   }
 
   .tile-icon-art {
-    width: 74px;
-    height: 74px;
+    width: calc(100% - 8px);
+    height: calc(100% - 24px);
+    min-height: 78px;
   }
 
   .tile-icon-brand {
-    width: 72px;
-    height: 72px;
+    width: calc(100% - 12px);
+    height: calc(100% - 28px);
+    min-height: 74px;
   }
 
   .topbar {
