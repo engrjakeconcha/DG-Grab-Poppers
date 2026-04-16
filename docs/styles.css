@@ -77,9 +77,10 @@ body.telegram {
 }
 
 .topbar-logo-hero {
-  width: min(100%, 360px);
+  width: min(100%, 240px);
   height: 104px;
   margin-left: auto;
+  object-fit: contain;
 }
 
 .section-kicker {
