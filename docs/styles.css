@@ -105,7 +105,7 @@ body.telegram {
 
 .service-tile {
   min-height: 118px;
-  padding: 8px 6px 10px;
+  padding: 26px 6px 10px;
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--text-main);
@@ -136,6 +136,26 @@ body.telegram {
   inset: 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 46%);
   pointer-events: none;
+}
+
+.service-tile::after {
+  content: "Coming Soon!";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(126, 240, 206, 0.95), rgba(95, 222, 186, 0.95));
+  color: #113223;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 12px rgba(9, 18, 12, 0.16);
+  z-index: 1;
 }
 
 .tile-icon {
@@ -222,6 +242,7 @@ body.telegram {
 @media (max-width: 380px) {
   .service-tile {
     min-height: 108px;
+    padding-top: 24px;
   }
 
   .tile-title {
