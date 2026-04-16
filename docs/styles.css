@@ -59,12 +59,8 @@ body.telegram {
   min-height: 118px;
   padding: 12px 12px 12px 8px;
   border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
-    linear-gradient(135deg, rgba(126, 240, 206, 0.08), transparent 46%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--white);
+  border: 1px solid rgba(17, 39, 29, 0.08);
   box-shadow: var(--shadow-soft);
 }
 
@@ -77,7 +73,7 @@ body.telegram {
 }
 
 .topbar-logo-hero {
-  width: min(100%, 240px);
+  width: min(100%, 250px);
   height: 104px;
   margin-left: auto;
   object-fit: contain;
@@ -94,7 +90,7 @@ body.telegram {
 
 .tiles-body {
   margin-top: 0;
-  padding: 16px 0 18px;
+  padding: 16px 10px 18px;
   background: var(--white);
   border-radius: 0;
 }
