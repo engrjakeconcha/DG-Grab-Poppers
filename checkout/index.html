@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Daddy Grab Checkout</title>
+    <meta
+      name="description"
+      content="Complete your Daddy Grab order with delivery, payment, promo code, and Telegram-aware checkout."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body data-page="checkout">
+    <div class="page-shell">
+      <header class="hero hero--checkout">
+        <div class="hero__glow"></div>
+        <div class="hero__copy">
+          <p class="eyebrow" id="store-badge">Checkout</p>
+          <h1 id="store-title">Daddy Grab Checkout</h1>
+          <p id="store-description" class="hero__description">
+            Review your items, confirm delivery details, and place your order.
+          </p>
+          <div class="hero__actions">
+            <button id="back-to-catalog" class="cta cta--secondary" type="button">Back to Store</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="catalog">
+        <section class="checkout-shell" id="checkout-shell">
+          <div class="checkout-shell__summary">
+            <div class="checkout-shell__head">
+              <p class="eyebrow">Your Cart</p>
+              <h2>Review Items</h2>
+            </div>
+            <div id="cart-empty" class="empty-state">Add items from the storefront to start your order.</div>
+            <div id="cart-list" class="cart-list"></div>
+            <div id="cart-totals" class="cart-totals" hidden></div>
+          </div>
+
+          <form id="checkout-form" class="checkout-form">
+            <div class="checkout-shell__head">
+              <p class="eyebrow">Delivery & Payment</p>
+              <h2>Place Order</h2>
+            </div>
+            <div class="form-grid">
+              <label class="field">
+                <span>Full Name</span>
+                <input name="delivery_name" type="text" required />
+              </label>
+              <label class="field" id="telegram-field-wrap">
+                <span id="telegram-field-label">Telegram ID or Username</span>
+                <input name="telegram_id" type="text" placeholder="@username or numeric ID" />
+                <small class="field-hint" id="telegram-field-hint">In Telegram, this auto-fills from your mini app account.</small>
+              </label>
+              <label class="field">
+                <span>Delivery Area</span>
+                <select name="delivery_area" required>
+                  <option value="Metro Manila">Metro Manila</option>
+                  <option value="Outside Metro Manila">Outside Metro Manila</option>
+                </select>
+              </label>
+              <label class="field">
+                <span id="delivery-contact-label">Philippine Mobile Number</span>
+                <input name="delivery_contact" type="tel" inputmode="tel" placeholder="09XXXXXXXXX" required />
+                <small class="field-hint" id="delivery-contact-hint">Required for all orders. Use Philippine mobile number format.</small>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Delivery Address</span>
+              <textarea name="delivery_address" rows="3" required></textarea>
+              <small class="field-hint" id="delivery-address-feedback">Address verification is available, but manual review will not block order submission.</small>
+              <button id="open-address-page" class="cta cta--secondary cta--inline" type="button">Open Address Page</button>
+            </label>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>Promo Code</span>
+                <div class="field-inline">
+                  <input name="promo_code" type="text" placeholder="Enter code or leave blank" />
+                  <button class="cta cta--secondary" id="apply-promo" type="button">Apply</button>
+                </div>
+              </label>
+              <label class="field">
+                <span>Referral Code</span>
+                <input name="referral_code" type="text" placeholder="Referral code (tracking only, no discount yet)" />
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>Payment Method</span>
+                <select name="payment_method" required>
+                  <option value="GCash">GCash</option>
+                  <option value="Maya">Maya</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Delivery Method</span>
+                <select name="delivery_method">
+                  <option value="Standard">Standard</option>
+                  <option value="Lalamove">Lalamove (inactive for now)</option>
+                  <option value="Lalamove Self-Paid">Lalamove Self-Paid (inactive for now)</option>
+                </select>
+              </label>
+            </div>
+
+            <section class="payment-guide" aria-label="Payment instructions">
+              <div class="payment-guide__head">
+                <p class="eyebrow">Payment Placeholders</p>
+                <h3>Temporary details for storefront setup</h3>
+              </div>
+              <div class="payment-guide__grid">
+                <article class="payment-card">
+                  <p class="payment-card__label">GCash</p>
+                  <strong>Placeholder</strong>
+                  <span>To be updated</span>
+                </article>
+                <article class="payment-card">
+                  <p class="payment-card__label">Maya</p>
+                  <strong>Placeholder</strong>
+                  <span>To be updated</span>
+                </article>
+                <article class="payment-card">
+                  <p class="payment-card__label">Bank Transfer</p>
+                  <strong>Placeholder</strong>
+                  <span>To be updated</span>
+                </article>
+              </div>
+              <p class="field-hint">
+                Lalamove and PayMongo frameworks remain in the setup but are inactive and will not interfere with order submission.
+              </p>
+            </section>
+
+            <div class="checkout-actions">
+              <button class="cta cta--secondary" id="refresh-quote" type="button">Refresh Total</button>
+              <button class="cta cta--primary" id="submit-order" type="submit">Place Order</button>
+            </div>
+            <div id="checkout-feedback" class="checkout-feedback" aria-live="polite"></div>
+          </form>
+        </section>
+      </main>
+
+      <div class="order-success" id="order-success" hidden>
+        <div class="order-success__backdrop" data-order-success-close></div>
+        <div class="order-success__card" role="dialog" aria-modal="true" aria-labelledby="order-success-title">
+          <p class="order-success__eyebrow">Order placed</p>
+          <h2 id="order-success-title">Your order is confirmed</h2>
+          <p class="order-success__copy">
+            Order number: <strong id="order-success-number">-</strong>
+          </p>
+          <div class="order-success__referral">
+            <p class="order-success__copy">Refer a friend with code: <strong id="own-referral-code">DADDY-000000</strong></p>
+            <button id="copy-referral" class="cta cta--secondary" type="button">Copy Referral Code</button>
+          </div>
+          <a id="order-success-track-link" class="cta cta--primary" href="/track">Track Order</a>
+          <button class="cta cta--secondary" type="button" data-order-success-close>Continue shopping</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

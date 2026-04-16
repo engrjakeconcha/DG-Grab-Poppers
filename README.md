@@ -1,37 +1,33 @@
-# Daddy Grab Super App Telegram Bot
+# Daddy Grab Super App
 
-This repo contains the staged Telegram bot clone for Daddy Grab Super App, built from the JCIT storefront bot architecture and pointed at the Daddy Grab Mini App at [http://daddygrab.online/](http://daddygrab.online/).
+This repository now contains the Daddy Grab platform build:
 
-## Files
-- `bot.py` main polling bot
-- `webhook_app.py` optional Flask webhook bridge
-- `config.py` bot identity, URLs, runtime paths, and sheet settings
-- `requirements.txt` Python dependencies
-- `assets/` start and completion images
+- Telegram bot for disclaimer, redirect, notifications, and broadcasts
+- GitHub Pages landing page in `/docs`
+- Vercel storefront for `store.daddygrab.online`
 
-## Local run
-```bash
-python3.11 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python bot.py
-```
+## Current Storefront Scope
 
-## Runtime defaults
-- Bot username defaults to `@DGrabstgbot`
-- Mini App URL defaults to `http://daddygrab.online/`
-- Admin URL defaults to `http://daddygrab.online/admin`
-- Runtime state defaults to `/opt/daddygrab-super-app`
+- Daddy Grab-only branding and routes
+- Supabase-backed catalog, checkout, order tracking, promos, and admin
+- No Google Sheets dependency for the storefront
+- No Retell or AI agent in this phase
+- Lalamove and PayMongo frameworks left inactive for future activation
 
-## Google Sheets behavior
-The bot will:
-- Open `GSHEET_ID` when provided
-- Otherwise open `GSHEET_NAME`
-- Create a fresh spreadsheet automatically when `GSHEET_NAME` does not exist yet
+## Storefront Routes
 
-The bot also auto-creates worksheets such as `Products`, `Promos`, `Users`, `Orders`, `Tickets`, `Affiliates`, and `BroadcastLog`.
+- `/` storefront catalog
+- `/checkout`
+- `/track`
+- `/address`
+- `/admin`
 
-## Deployment notes
-- Target droplet: `157.230.194.50`
-- GitHub repo: [DG-Grab-Poppers](https://github.com/engrjakeconcha/DG-Grab-Poppers)
-- Before production, move secrets like the Telegram token and service account JSON to environment variables
+## Seeded Setup
+
+- Test products for `poppers`, `supplements`, `toys`, and `lubricants`
+- Test promo code: `DADDYTEST10`
+- Seeded admins:
+  - `Em` / `101010` / `super_admin`
+  - `Admin1` / `010101` / `admin`
+
+Rotate seeded passwords before production.

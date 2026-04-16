@@ -1,0 +1,10 @@
+bot.py
+config.py
+webhook_app.py
+requirements.txt
+deploy/**
+scripts/**
+venv/**
+.venv/**
+__pycache__/**
+*.pyc

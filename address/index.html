@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Daddy Grab Delivery Address</title>
+    <meta name="description" content="Review your Daddy Grab delivery address before checkout." />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body data-page="address">
+    <div class="page-shell">
+      <header class="hero hero--checkout">
+        <div class="hero__glow"></div>
+        <div class="hero__copy">
+          <p class="eyebrow" id="store-badge">Delivery Address</p>
+          <h1 id="store-title">Set your delivery point</h1>
+          <p id="store-description" class="hero__description">
+            Save your delivery details here. Verification is optional and will not block submission.
+          </p>
+          <div class="hero__actions">
+            <button id="back-to-checkout" class="cta cta--secondary" type="button">Back to Checkout</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="catalog">
+        <section class="checkout-shell checkout-shell--catalog">
+          <div class="checkout-shell__summary">
+            <div class="checkout-shell__head">
+              <p class="eyebrow">Address</p>
+              <h2>Delivery Details</h2>
+            </div>
+            <form id="address-form" class="checkout-form tracking-form">
+              <div class="form-grid">
+                <label class="field">
+                  <span>Delivery Area</span>
+                  <select name="delivery_area" required>
+                    <option value="Metro Manila">Metro Manila</option>
+                    <option value="Outside Metro Manila">Outside Metro Manila</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Delivery Method</span>
+                  <select name="delivery_method" required>
+                    <option value="Standard">Standard</option>
+                    <option value="Lalamove">Lalamove (inactive for now)</option>
+                    <option value="Lalamove Self-Paid">Lalamove Self-Paid (inactive for now)</option>
+                  </select>
+                </label>
+              </div>
+              <label class="field">
+                <span>Delivery Address</span>
+                <textarea name="delivery_address" rows="4" placeholder="House number, street, barangay, city" required></textarea>
+                <small id="address-page-feedback" class="field-hint">Verification is optional. We can still manually review the address.</small>
+              </label>
+              <div class="checkout-actions">
+                <button id="verify-address" class="cta cta--secondary" type="button">Verify Address</button>
+                <button id="use-address" class="cta cta--primary" type="submit">Use This Address</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
