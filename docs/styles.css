@@ -100,13 +100,14 @@ body.telegram {
 
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
   margin-top: 0;
 }
 
 .service-tile {
-  min-height: 118px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   padding: 20px 4px 4px;
   border-radius: var(--radius-lg);
   text-decoration: none;
@@ -165,7 +166,6 @@ body.telegram {
 .tile-icon-art {
   width: calc(100% - 8px);
   height: calc(100% - 24px);
-  min-height: 88px;
   border-radius: 18px;
   object-fit: cover;
   box-shadow: none;
@@ -175,11 +175,83 @@ body.telegram {
 .tile-icon-brand {
   width: calc(100% - 12px);
   height: calc(100% - 28px);
-  min-height: 84px;
   border-radius: 18px;
   object-fit: cover;
   box-shadow: none;
   margin-top: 0;
+}
+
+.whats-new {
+  margin-top: 16px;
+}
+
+.section-head-dark {
+  margin-bottom: 12px;
+}
+
+.section-kicker-dark {
+  color: var(--forest);
+}
+
+.updates-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.update-card {
+  position: relative;
+  min-height: 150px;
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  background: #e9eee8;
+  box-shadow: 0 10px 22px rgba(12, 28, 19, 0.12);
+}
+
+.update-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 28%, rgba(13, 29, 20, 0.78) 100%);
+}
+
+.update-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.update-copy {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  color: var(--white);
+}
+
+.update-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(126, 240, 206, 0.92);
+  color: #113223;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.update-copy strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "Sora", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.15;
 }
 
 .partners-section {
@@ -230,11 +302,6 @@ body.telegram {
 }
 
 @media (max-width: 380px) {
-  .service-tile {
-    min-height: 108px;
-    padding: 20px 4px 4px;
-  }
-
   .tile-icon {
     width: 52px;
     height: 52px;
@@ -243,13 +310,15 @@ body.telegram {
   .tile-icon-art {
     width: calc(100% - 8px);
     height: calc(100% - 24px);
-    min-height: 78px;
   }
 
   .tile-icon-brand {
     width: calc(100% - 12px);
     height: calc(100% - 28px);
-    min-height: 74px;
+  }
+
+  .updates-grid {
+    grid-template-columns: 1fr;
   }
 
   .topbar {
