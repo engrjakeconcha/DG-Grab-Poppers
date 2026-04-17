@@ -220,25 +220,16 @@ function renderProducts() {
   products.forEach((product) => {
     const node = template.content.firstElementChild.cloneNode(true);
     const image = node.querySelector(".product-card__image");
-    const category = node.querySelector(".product-card__category");
-    const stock = node.querySelector(".product-card__stock");
     const title = node.querySelector(".product-card__title");
-    const description = node.querySelector(".product-card__description");
     const price = node.querySelector(".product-card__price");
-    const quickView = node.querySelector(".product-card__quickview");
     const button = node.querySelector(".product-card__button");
     if (image) {
       image.src = product.image_url || STORE.fallbackImage;
       image.alt = product.name;
+      image.addEventListener("click", () => openQuickView(product));
     }
-    if (category) category.textContent = product.category;
-    if (stock) stock.textContent = `${product.stock} in stock`;
     if (title) title.textContent = product.name;
-    if (description) description.textContent = product.description;
     if (price) price.textContent = peso(product.price);
-    if (quickView) {
-      quickView.addEventListener("click", () => openQuickView(product));
-    }
     if (button) {
       button.addEventListener("click", () => addToCart(product));
     }
