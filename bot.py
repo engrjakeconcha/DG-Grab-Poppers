@@ -326,6 +326,17 @@ BOT_MENU_BUTTON_TEXT = "Order Now!"
 STORE_TAGLINE = "Discreet. Fast. Ready Anytime."
 STORE_CTA = "Poppers 24 Hours. Order Now!"
 
+
+def user_first_name(user) -> str:
+    """Return a friendly first-name fallback for Telegram users."""
+    if not user:
+        return "there"
+    first = str(getattr(user, "first_name", "") or "").strip()
+    if first:
+        return first
+    full = str(getattr(user, "full_name", "") or "").strip()
+    return full.split()[0] if full else "there"
+
 ORDER_HEADERS = [
     "order_id",
     "created_at",
@@ -2226,9 +2237,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         token = str(context.args[0]).strip().lower()
         if token.startswith("catalog_"):
             context.user_data["pending_catalog_sku"] = token.replace("catalog_", "", 1).upper()
+    first_name = user_first_name(user)
     text = textwrap.dedent(
-        """
-        Welcome to *Daddy Grab Super App*.
+        f"""
+        Welcome to *Daddy Grab Super App*, {first_name}.
 
         Before we continue, here’s the important bit:
         Daddy Grab Super App stores your account, contact, and order details for privacy, marketing, and order fulfilment purposes.
@@ -2252,17 +2264,18 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle consent response."""
     register_private_user(context, update.effective_user, update.effective_chat.id)
     choice = update.message.text.strip().lower()
+    first_name = user_first_name(update.effective_user)
     if "yes" in choice:
         pending_sku = context.user_data.pop("pending_catalog_sku", "")
         if pending_sku:
             await update.message.reply_text("Perfect. We’re opening your selected item now.")
             return await open_catalog_product_by_sku(update.message, context, pending_sku)
         await update.message.reply_text(
-            "Consent received.",
+            f"Consent received, {first_name}.",
             reply_markup=ReplyKeyboardRemove(),
         )
         await update.message.reply_text(
-            "Welcome to Daddy Grab Super App. To start your journey, tap *Order Now!* below:",
+            f"Welcome to Daddy Grab Super App, {first_name}. To start your journey, tap *Order Now!* below:",
             reply_markup=lets_go_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
@@ -2273,7 +2286,7 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return MENU
     await update.message.reply_text(
-        "Access declined. Thank you for using the Daddy Grab Super App bot.",
+        f"Access declined, {first_name}. Thank you for using the Daddy Grab Super App bot.",
         reply_markup=ReplyKeyboardRemove(),
     )
     return ConversationHandler.END
@@ -2283,23 +2296,28 @@ async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     """Route main menu selections."""
     register_private_user(context, update.effective_user, update.effective_chat.id)
     text = update.message.text.strip()
+    first_name = user_first_name(update.effective_user)
     if "Super App" in text:
         return await ordering_start(update, context)
     if "Report Issue" in text:
         await notify_admin_support_request(update, context, "Report Issue")
         await update.message.reply_text(
-            miniapp_redirect_message("support"),
+            f"{first_name}, {miniapp_redirect_message('support')[0].lower()}{miniapp_redirect_message('support')[1:]}",
             reply_markup=report_issue_keyboard(),
         )
         return MENU
-    await update.message.reply_text("Choose either Super App or Report Issue below.", reply_markup=main_menu_keyboard())
+    await update.message.reply_text(
+        f"{first_name}, choose either Super App or Report Issue below.",
+        reply_markup=main_menu_keyboard(),
+    )
     return MENU
 
 
 async def ordering_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Redirect ordering requests to the hosted catalogue/AI experience."""
+    first_name = user_first_name(update.effective_user)
     await update.message.reply_text(
-        miniapp_redirect_message(),
+        f"{first_name}, {miniapp_redirect_message()[0].lower()}{miniapp_redirect_message()[1:]}",
         reply_markup=catalogue_redirect_keyboard(),
     )
     return MENU

@@ -368,6 +368,25 @@ async function sendTelegramMessage(chatId, text) {
   return response.ok;
 }
 
+async function sendCustomerOrderNotification(order) {
+  const targetId = String(order.telegram_user_id || order.telegram_id || "").trim();
+  if (!targetId || !TELEGRAM_BOT_TOKEN) {
+    return false;
+  }
+  const firstName = String(order.customer_first_name || order.customer_name || "there").trim().split(/\s+/)[0];
+  const lines = [
+    `Hi ${firstName}, your Daddy Grab order is in.`,
+    "",
+    `Order Number: ${order.order_id}`,
+    `Status: ${order.order_status}`,
+    `Payment: ${order.payment_method}`,
+    `Total: PHP ${Number(order.total || 0).toFixed(2)}`,
+    "",
+    `Track here: ${STORE_BASE_URL}/track?order_id=${encodeURIComponent(order.order_id)}`,
+  ];
+  return sendTelegramMessage(targetId, lines.join("\n"));
+}
+
 async function sendOrderEmail(subject, body) {
   if (!RESEND_API_KEY || !RESEND_TO) {
     return false;
@@ -478,7 +497,7 @@ async function createOrder(payload) {
     shipping_fee: 0,
     total,
     notes: String(payload.notes || "").trim(),
-    payment_proof_url: "",
+    payment_proof_url: String(payload.payment_proof_url || "").trim(),
     lalamove_enabled: true,
     lalamove_active: false,
     lalamove_status: "inactive",
@@ -582,6 +601,7 @@ async function createOrder(payload) {
     }
   }
   await sendOrderEmail(`New Order - ${orderId}`, notification).catch(() => false);
+  await sendCustomerOrderNotification(orderRow).catch(() => false);
 
   return {
     order: {

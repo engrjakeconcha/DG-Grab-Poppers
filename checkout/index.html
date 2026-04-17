@@ -52,6 +52,7 @@
                 <input name="telegram_id" type="text" placeholder="@username or numeric ID" />
                 <small class="field-hint" id="telegram-field-hint">In Telegram, this auto-fills from your mini app account.</small>
               </label>
+              <input name="telegram_username" type="hidden" />
               <label class="field">
                 <span>Delivery Area</span>
                 <select name="delivery_area" required>
@@ -108,26 +109,31 @@
 
             <section class="payment-guide" aria-label="Payment instructions">
               <div class="payment-guide__head">
-                <p class="eyebrow">Payment Placeholders</p>
-                <h3>Temporary details for storefront setup</h3>
+                <p class="eyebrow">Payment Details</p>
+                <h3 id="payment-guide-title">GCash instructions</h3>
               </div>
-              <div class="payment-guide__grid">
-                <article class="payment-card">
+              <div class="payment-guide__grid payment-guide__grid--single">
+                <article class="payment-card" data-payment-card="GCash">
                   <p class="payment-card__label">GCash</p>
-                  <strong>Placeholder</strong>
-                  <span>To be updated</span>
+                  <strong>GCash placeholder</strong>
+                  <span>Recipient details will be updated before launch.</span>
                 </article>
-                <article class="payment-card">
+                <article class="payment-card" data-payment-card="Maya" hidden>
                   <p class="payment-card__label">Maya</p>
-                  <strong>Placeholder</strong>
-                  <span>To be updated</span>
+                  <strong>Maya placeholder</strong>
+                  <span>Recipient details will be updated before launch.</span>
                 </article>
-                <article class="payment-card">
+                <article class="payment-card" data-payment-card="Bank Transfer" hidden>
                   <p class="payment-card__label">Bank Transfer</p>
-                  <strong>Placeholder</strong>
-                  <span>To be updated</span>
+                  <strong>Bank transfer placeholder</strong>
+                  <span>Bank details will be updated before launch.</span>
                 </article>
               </div>
+              <label class="field">
+                <span>Payment Proof</span>
+                <input name="payment_proof" type="file" accept="image/*,.pdf" />
+                <small class="field-hint" id="payment-proof-hint">Upload your screenshot or receipt before submitting your order.</small>
+              </label>
               <p class="field-hint">
                 Lalamove and PayMongo frameworks remain in the setup but are inactive and will not interfere with order submission.
               </p>

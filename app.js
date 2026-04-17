@@ -74,6 +74,21 @@ function getTelegramMiniAppUser() {
   };
 }
 
+const PAYMENT_DETAILS = {
+  GCash: {
+    title: "GCash instructions",
+    hint: "Upload your GCash screenshot or receipt before submitting your order.",
+  },
+  Maya: {
+    title: "Maya instructions",
+    hint: "Upload your Maya screenshot or receipt before submitting your order.",
+  },
+  "Bank Transfer": {
+    title: "Bank transfer instructions",
+    hint: "Upload your bank transfer receipt before submitting your order.",
+  },
+};
+
 function greetingName() {
   const tgUser = getTelegramMiniAppUser();
   if (tgUser?.firstName) return tgUser.firstName;
@@ -281,6 +296,7 @@ function populateCheckoutDraft(form) {
   };
   setValue("delivery_name", tgUser?.fullName || draft.delivery_name);
   setValue("telegram_id", tgUser?.username ? `@${tgUser.username}` : tgUser?.id || draft.telegram_id, true);
+  setValue("telegram_username", tgUser?.username ? `@${tgUser.username}` : draft.telegram_username, true);
   setValue("delivery_area", draft.delivery_area);
   setValue("delivery_contact", draft.delivery_contact);
   setValue("delivery_address", draft.delivery_address);
@@ -293,6 +309,11 @@ function populateCheckoutDraft(form) {
   if (telegramField && tgUser) {
     telegramField.readOnly = true;
   }
+  const telegramUsernameField = form.elements.telegram_username;
+  if (telegramUsernameField && tgUser?.username) {
+    telegramUsernameField.value = `@${tgUser.username}`;
+  }
+  updatePaymentGuide(form);
 }
 
 function persistCheckoutDraft(form) {
@@ -300,6 +321,7 @@ function persistCheckoutDraft(form) {
   writeJson(STORAGE_KEYS.checkout, {
     delivery_name: String(form.elements.delivery_name?.value || "").trim(),
     telegram_id: String(form.elements.telegram_id?.value || "").trim(),
+    telegram_username: String(form.elements.telegram_username?.value || "").trim(),
     delivery_area: String(form.elements.delivery_area?.value || "").trim(),
     delivery_contact: String(form.elements.delivery_contact?.value || "").trim(),
     delivery_address: String(form.elements.delivery_address?.value || "").trim(),
@@ -308,6 +330,39 @@ function persistCheckoutDraft(form) {
     payment_method: String(form.elements.payment_method?.value || "").trim(),
     delivery_method: String(form.elements.delivery_method?.value || "").trim(),
   });
+}
+
+function updatePaymentGuide(form) {
+  if (!form) return;
+  const paymentMethod = String(form.elements.payment_method?.value || "GCash").trim();
+  const detail = PAYMENT_DETAILS[paymentMethod] || PAYMENT_DETAILS.GCash;
+  const titleNode = document.getElementById("payment-guide-title");
+  const hintNode = document.getElementById("payment-proof-hint");
+  if (titleNode) titleNode.textContent = detail.title;
+  if (hintNode) hintNode.textContent = detail.hint;
+  document.querySelectorAll("[data-payment-card]").forEach((card) => {
+    card.hidden = card.dataset.paymentCard !== paymentMethod;
+  });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read the uploaded payment proof."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function parseTelegramIdentity(rawValue) {
+  const raw = String(rawValue || "").trim();
+  if (!raw) {
+    return { id: "", username: "" };
+  }
+  if (/^\d+$/.test(raw)) {
+    return { id: raw, username: "" };
+  }
+  return { id: "", username: raw.replace(/^@/, "") };
 }
 
 function renderCheckout() {
@@ -415,6 +470,15 @@ async function submitOrder(event) {
     return;
   }
   const tgUser = getTelegramMiniAppUser();
+  const manualTelegram = parseTelegramIdentity(form.elements.telegram_id?.value || "");
+  if (tgUser?.username && form.elements.telegram_username) {
+    form.elements.telegram_username.value = `@${tgUser.username}`;
+  }
+  let paymentProofUrl = "";
+  const paymentProofFile = form.elements.payment_proof?.files?.[0];
+  if (paymentProofFile) {
+    paymentProofUrl = await readFileAsDataUrl(paymentProofFile);
+  }
   persistCheckoutDraft(form);
   setCheckoutFeedback("Placing your order...");
   const payload = {
@@ -422,9 +486,12 @@ async function submitOrder(event) {
     customer: {
       customer_name: String(form.elements.delivery_name?.value || "").trim(),
       first_name: tgUser?.firstName || "",
-      telegram_id: tgUser?.id || "",
-      telegram_user_id: tgUser?.id || "",
-      telegram_username: tgUser?.username || String(form.elements.telegram_id?.value || "").trim().replace(/^@/, ""),
+      telegram_id: tgUser?.id || manualTelegram.id,
+      telegram_user_id: tgUser?.id || manualTelegram.id,
+      telegram_username:
+        tgUser?.username ||
+        String(form.elements.telegram_username?.value || "").trim().replace(/^@/, "") ||
+        manualTelegram.username,
       telegram_init_data: tgUser?.initData || "",
       phone_number: phoneCheck.normalized,
       delivery_area: String(form.elements.delivery_area?.value || "").trim(),
@@ -436,6 +503,7 @@ async function submitOrder(event) {
     referral_code: String(form.elements.referral_code?.value || "").trim().toUpperCase(),
     address_verified: false,
     address_verification_notes: "Manual review allowed; verification not required for submission.",
+    payment_proof_url: paymentProofUrl,
     items,
   };
   try {
@@ -624,11 +692,13 @@ async function initCheckoutPage() {
   form.addEventListener("submit", submitOrder);
   document.getElementById("refresh-quote")?.addEventListener("click", refreshQuote);
   document.getElementById("apply-promo")?.addEventListener("click", refreshQuote);
-  ["delivery_name", "telegram_id", "delivery_area", "delivery_contact", "delivery_address", "promo_code", "referral_code", "payment_method", "delivery_method"].forEach((name) => {
+  ["delivery_name", "telegram_id", "telegram_username", "delivery_area", "delivery_contact", "delivery_address", "promo_code", "referral_code", "payment_method", "delivery_method"].forEach((name) => {
     const field = form.elements[name];
     field?.addEventListener("input", () => persistCheckoutDraft(form));
     field?.addEventListener("change", () => persistCheckoutDraft(form));
   });
+  form.elements.payment_method?.addEventListener("change", () => updatePaymentGuide(form));
+  updatePaymentGuide(form);
 }
 
 async function initCatalogPage() {

@@ -344,6 +344,10 @@ img {
   gap: 10px;
 }
 
+.payment-guide__grid--single .payment-card[hidden] {
+  display: none;
+}
+
 .cta,
 .cart-button,
 .product-card__button {
