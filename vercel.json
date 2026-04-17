@@ -22,11 +22,12 @@
     { "src": "/api/storefront/daddygrab-track", "dest": "/api/storefront/daddygrab-track.js" },
     { "src": "/api/admin/daddygrab-admin", "dest": "/api/admin/daddygrab-admin.js" },
     { "handle": "filesystem" },
+    { "src": "/catalog", "dest": "/index.html" },
     { "src": "/checkout", "dest": "/checkout/index.html" },
     { "src": "/report", "dest": "/report/index.html" },
     { "src": "/track", "dest": "/track/index.html" },
     { "src": "/address", "dest": "/address/index.html" },
     { "src": "/admin", "dest": "/admin/index.html" },
-    { "src": "/", "dest": "/index.html" }
+    { "src": "/", "dest": "/docs/index.html" }
   ]
 }

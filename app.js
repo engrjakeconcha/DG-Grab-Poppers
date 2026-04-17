@@ -748,7 +748,7 @@ function bindNavigation() {
     });
   });
   document.getElementById("back-to-catalog")?.addEventListener("click", () => {
-    window.location.href = "/";
+    window.location.href = "/catalog";
   });
   document.getElementById("open-address-page")?.addEventListener("click", () => {
     const form = document.getElementById("checkout-form");
