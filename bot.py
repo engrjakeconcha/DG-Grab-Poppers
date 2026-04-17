@@ -29,6 +29,7 @@ from telegram import (
     InputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    MenuButtonWebApp,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
     Update,
@@ -304,17 +305,26 @@ class InstanceLock:
 MEMBER_CAPTURE_THROTTLE_SECONDS = 300
 
 PUBLIC_COMMANDS = [
-    BotCommand("start", "Open Daddy Grab"),
-    BotCommand("help", "Show help"),
-    BotCommand("cancel", "Cancel current flow"),
+    BotCommand("start", "Privacy notice and Order Now access"),
+    BotCommand("help", "View platform info and support"),
+    BotCommand("cancel", "Close the current flow"),
 ]
 
 ADMIN_COMMANDS = [
     BotCommand("admin", "Open admin console"),
-    BotCommand("status", "Bot status"),
-    BotCommand("broadcast", "Broadcast to users"),
-    BotCommand("reply", "Reply to user"),
+    BotCommand("status", "Check bot status"),
+    BotCommand("broadcast", "Send a broadcast"),
+    BotCommand("reply", "Reply to a user"),
 ]
+
+BOT_DESCRIPTION = (
+    "Daddy Grab Super App is one platform for discreet ordering, support, "
+    "notifications, and updates."
+)
+BOT_SHORT_DESCRIPTION = "Discreet. Fast. Ready Anytime."
+BOT_MENU_BUTTON_TEXT = "Order Now!"
+STORE_TAGLINE = "Discreet. Fast. Ready Anytime."
+STORE_CTA = "Poppers 24 Hours. Order Now!"
 
 ORDER_HEADERS = [
     "order_id",
@@ -1841,14 +1851,14 @@ def referral_share_keyboard(uid: int) -> InlineKeyboardMarkup:
 def catalogue_redirect_keyboard() -> InlineKeyboardMarkup:
     """Link users to the hosted catalogue/AI agent page."""
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Open Daddy Grab", web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
+        [[InlineKeyboardButton(STORE_CTA, web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
     )
 
 
 def lets_go_keyboard() -> InlineKeyboardMarkup:
     """Primary start-flow shortcut into Daddy Grab."""
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Let's Go", web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
+        [[InlineKeyboardButton(BOT_MENU_BUTTON_TEXT, web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL))]]
     )
 
 
@@ -1869,7 +1879,7 @@ def admin_tools_keyboard() -> InlineKeyboardMarkup:
 def miniapp_redirect_message(action: str = "continue") -> str:
     """Return consistent redirect copy for storefront actions."""
     if action == "support":
-        return "Need help? Open Report Issue below and the Daddy Grab team will assist you there."
+        return "Need help? Open Report Issue below and the Daddy Grab team will assist you there inside the platform."
     if action == "bulk":
         return "Bulk orders are handled inside Daddy Grab. Open it below and send your product list, quantities, and target date."
     if action == "rewards":
@@ -1878,7 +1888,7 @@ def miniapp_redirect_message(action: str = "continue") -> str:
         return "Affiliate sign-ups are handled inside Daddy Grab. Open it below and use support chat to get started."
     if action == "track":
         return "Order tracking is available inside Daddy Grab. Open it below to check your latest order."
-    return "Daddy Grab is your one-stop shop for products and services. Open it below to browse, order, and get support."
+    return f"{STORE_TAGLINE} {STORE_CTA}"
 
 
 def build_catalog_keyboard(products: List[Product]) -> InlineKeyboardMarkup:
@@ -2221,8 +2231,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         Welcome to *Daddy Grab Super App*.
 
         Before we continue, here’s the important bit:
-        • This platform will store your data for marketing and order fulfilment purposes.
-        • 18+ only.
+        Daddy Grab Super App stores your account, contact, and order details for privacy, marketing, and order fulfilment purposes.
+        Daddy Grab Super App features adult products and content intended only for users who are 18 years old or older.
 
         Do you agree to continue?
         """
@@ -2252,18 +2262,19 @@ async def consent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             reply_markup=ReplyKeyboardRemove(),
         )
         await update.message.reply_text(
-            "Welcome to Daddy Grab Super App, to start your journey click the *Let's Go* button below:",
+            "Welcome to Daddy Grab Super App. To start your journey, tap *Order Now!* below:",
             reply_markup=lets_go_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
         await update.message.reply_text(
-            "Or tap *Super App* to continue, or *Report Issue* if you need help.",
+            "You can also use *Super App* to continue or *Report Issue* if you need help.",
             reply_markup=main_menu_keyboard(),
             parse_mode=ParseMode.MARKDOWN,
         )
         return MENU
     await update.message.reply_text(
-        "No problem. If you want to come back later, send /start anytime.", reply_markup=ReplyKeyboardRemove()
+        "Access declined. Thank you for using the Daddy Grab Super App bot.",
+        reply_markup=ReplyKeyboardRemove(),
     )
     return ConversationHandler.END
 
@@ -3422,10 +3433,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text(text)
     else:
         text = (
-            "Daddy Grab on Telegram is here to guide you into the Mini App.\n"
-            "• Orders, tracking, rewards, and referrals are all handled there\n"
-            "• For help or bulk orders, open the Mini App or tap Contact Admin here\n"
-            "• Send /start anytime to get back to the main menu"
+            "Daddy Grab on Telegram keeps everything connected in one platform.\n"
+            "• Discreet. Fast. Ready Anytime.\n"
+            "• Tap Order Now! to open the Super App for ordering and tracking\n"
+            "• Tap Report Issue if you need help from the team\n"
+            "• Send /start anytime to review the privacy notice again"
         )
         await update.message.reply_text(text, reply_markup=catalogue_redirect_keyboard())
 
@@ -3548,6 +3560,18 @@ async def sync_bot_commands(context: ContextTypes.DEFAULT_TYPE) -> None:
             )
         except Exception as exc:
             logger.warning("Failed to set admin command scope for %s: %s", admin_id, exc)
+
+
+async def sync_bot_profile(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sync bot descriptions and chat menu button."""
+    await context.bot.set_my_description(BOT_DESCRIPTION)
+    await context.bot.set_my_short_description(BOT_SHORT_DESCRIPTION)
+    await context.bot.set_chat_menu_button(
+        menu_button=MenuButtonWebApp(
+            text=BOT_MENU_BUTTON_TEXT,
+            web_app=WebAppInfo(url=DADDY_GRAB_MINIAPP_URL),
+        )
+    )
 
 
 async def tracking_select_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -4353,6 +4377,10 @@ async def on_startup(app: Application) -> None:
         await sync_bot_commands(type("StartupContext", (), {"bot": app.bot})())
     except Exception as exc:
         logger.warning("Failed to sync startup commands: %s", exc)
+    try:
+        await sync_bot_profile(type("StartupContext", (), {"bot": app.bot})())
+    except Exception as exc:
+        logger.warning("Failed to sync startup profile: %s", exc)
     try:
         await app.bot.send_message(
             chat_id=ADMIN_GROUP_ID,

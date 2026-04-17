@@ -3,8 +3,8 @@
 const STORE = {
   slug: "daddygrab",
   title: "Daddy Grab Super App",
-  badge: "Daddy Grab Store",
-  description: "One platform for product lines, support, and order follow-through.",
+  badge: "Discreet. Fast. Ready Anytime.",
+  description: "Poppers 24 Hours. Order Now!",
   baseUrl: "https://store.daddygrab.online",
   logoUrl: "/Assets/dglogotransparent.png",
   fallbackImage: "/Assets/logo.png",
