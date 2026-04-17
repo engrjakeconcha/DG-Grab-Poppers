@@ -1,105 +1,108 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Daddy Grab Super App Store</title>
+    <title>Daddy Grab Super App</title>
     <meta
       name="description"
       content="Discreet. Fast. Ready Anytime. Poppers 24 Hours. Order Now!"
     />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/landing-styles.css" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
-  <body data-page="catalog">
-    <div class="page-shell">
-      <header class="hero">
-        <div class="hero__glow"></div>
-        <div class="hero__copy">
-          <img class="hero__billboard" src="/Assets/hero.jpg" alt="Daddy Grab Super App hero" />
-          <p id="store-greeting" class="hero__description hero__description--compact hero__description--greeting"></p>
-          <div class="hero__actions">
-            <button id="copy-link" class="cta cta--secondary" type="button">Copy Store Link</button>
-            <button id="go-track" class="cta cta--secondary" type="button">Track Order</button>
-            <button id="go-admin" class="cta cta--secondary" type="button">Admin</button>
-            <button id="go-checkout" class="cta cta--primary" type="button">Order Now!</button>
-            <button id="cart-button" class="cart-button" type="button" data-go-checkout aria-label="Open cart and checkout">
-              <span class="cart-button__count" id="cart-count">0</span>
-            </button>
-          </div>
-        </div>
-      </header>
+  <body>
+    <main class="app-shell">
+      <section class="hero-stage">
+        <header class="topbar">
+          <img class="topbar-logo topbar-logo-hero" src="/docs/assets/hero.jpg" alt="Daddy Grab Super App hero" />
+        </header>
+      </section>
 
-      <main class="catalog">
-        <section class="toolbar">
-          <div class="search-wrap">
-            <label class="sr-only" for="search">Search products</label>
-            <input id="search" type="search" placeholder="Search product, category, or keyword" />
-          </div>
-          <div class="filters" id="filters"></div>
+      <section class="tiles-body">
+        <section class="tile-grid" aria-label="Daddy Grab destinations">
+        <a class="service-tile" href="/catalog" data-coming-soon="false" data-telegram="true" aria-label="One Stop Shop">
+          <img class="tile-icon tile-icon-brand" src="/docs/assets/logo-first-tile.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="https://daddygrab.online/book" data-coming-soon="true" data-telegram="true" aria-label="Book me!">
+          <img class="tile-icon tile-icon-art" src="/docs/assets/toolkit-book.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="https://daddygrab.online/events" data-coming-soon="true" data-telegram="true" aria-label="Our Events!">
+          <img class="tile-icon tile-icon-art" src="/docs/assets/toolkit-events.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="https://daddygrab.online/channels" data-coming-soon="true" data-telegram="true" aria-label="Channels">
+          <img class="tile-icon tile-icon-art" src="/docs/assets/toolkit-channels.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="/report" data-coming-soon="false" data-telegram="true" aria-label="Report Issue">
+          <img class="tile-icon tile-icon-art" src="/docs/assets/toolkit-report.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="/track" data-coming-soon="false" data-telegram="true" aria-label="Track my Order">
+          <img class="tile-icon tile-icon-art" src="/docs/assets/toolkit-track.png" alt="" />
+        </a>
+
+        <a class="service-tile" href="https://x.com" data-coming-soon="true" data-telegram="true" aria-label="X">
+          <img class="tile-icon tile-icon-brand" src="/docs/assets/xlogo.jpeg" alt="" />
+        </a>
+
+        <a class="service-tile" href="https://tevi.com" data-coming-soon="true" data-telegram="true" aria-label="Tevi">
+          <img class="tile-icon tile-icon-brand" src="/docs/assets/tevilogo.jpg" alt="" />
+        </a>
         </section>
 
-        <section class="catalog-grid" id="product-grid" aria-live="polite"></section>
-      </main>
-    </div>
+        <section class="whats-new" aria-label="What's new">
+          <div class="section-head section-head-dark">
+            <p class="section-kicker section-kicker-dark">What’s New</p>
+          </div>
 
-    <template id="product-card-template">
-      <article class="product-card">
-        <div class="product-card__media">
-          <img class="product-card__image" alt="" loading="lazy" />
-        </div>
-        <div class="product-card__body">
-          <div class="product-card__head">
-            <p class="product-card__category"></p>
-            <span class="product-card__stock"></span>
-          </div>
-          <h2 class="product-card__title"></h2>
-          <p class="product-card__description"></p>
-          <div class="product-card__footer">
-            <strong class="product-card__price"></strong>
-            <button class="product-card__quickview cta cta--secondary" type="button">Quick View</button>
-            <button class="product-card__button" type="button">Add to Cart</button>
-          </div>
-        </div>
-      </article>
-    </template>
+          <div class="updates-grid">
+            <a class="update-card update-card-promo" href="/catalog" data-telegram="true">
+              <img class="update-image" src="/docs/assets/toolkit-shop.png" alt="" />
+              <div class="update-copy">
+                <span class="update-tag">Promo</span>
+                <strong>Poppers promo drop</strong>
+              </div>
+            </a>
 
-    <section id="quick-view" class="product-quickview" hidden>
-      <button class="product-quickview__backdrop" type="button" data-quickview-close aria-label="Close quick view"></button>
-      <div class="product-quickview__card" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
-        <button class="product-quickview__close" type="button" data-quickview-close aria-label="Close quick view">×</button>
-        <div class="product-quickview__media">
-          <img id="quick-view-image" class="product-quickview__image" alt="" />
-        </div>
-        <div class="product-quickview__copy">
-          <p id="quick-view-category" class="product-quickview__category"></p>
-          <h2 id="quick-view-title"></h2>
-          <p id="quick-view-description" class="product-quickview__description"></p>
-          <div class="product-quickview__meta">
-            <strong id="quick-view-price"></strong>
-            <span id="quick-view-stock"></span>
+            <a class="update-card update-card-event" href="https://daddygrab.online/events" data-telegram="true">
+              <img class="update-image" src="/docs/assets/toolkit-events.png" alt="" />
+              <div class="update-copy">
+                <span class="update-tag">Event</span>
+                <strong>Upcoming community night</strong>
+              </div>
+            </a>
           </div>
-          <div class="product-quickview__actions">
-            <button id="quick-view-add" class="cta cta--primary" type="button">Add to Cart</button>
-            <button class="cta cta--secondary" type="button" data-quickview-close>Close</button>
+        </section>
+      </section>
+
+      <section class="partners-section">
+        <div class="section-head">
+          <p class="section-kicker">Here’s our partners</p>
+        </div>
+
+        <div class="partner-marquee" aria-label="Scrolling partner placements">
+          <div class="partner-track">
+            <a class="partner-image" href="https://x.com"><img src="/docs/assets/partner-x.svg" alt="X partner mock" /></a>
+            <a class="partner-image" href="https://tevi.com"><img src="/docs/assets/partner-tevi.svg" alt="Tevi partner mock" /></a>
+            <a class="partner-image" href="https://jff.com"><img src="/docs/assets/partner-jff.svg" alt="JFF partner mock" /></a>
+            <a class="partner-image" href="https://x.com"><img src="/docs/assets/partner-x.svg" alt="" /></a>
+            <a class="partner-image" href="https://tevi.com"><img src="/docs/assets/partner-tevi.svg" alt="" /></a>
+            <a class="partner-image" href="https://jff.com"><img src="/docs/assets/partner-jff.svg" alt="" /></a>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
-    <section id="cart-toast" class="cart-toast" hidden aria-live="polite">
-      <div class="cart-toast__card">
-        <div class="cart-toast__copy">
-          <strong id="cart-toast-title">Added to cart</strong>
-          <p id="cart-toast-message"></p>
-        </div>
-        <div class="cart-toast__actions">
-          <button id="cart-toast-continue" class="cta cta--secondary" type="button">Continue Shopping</button>
-          <button id="cart-toast-checkout" class="cta cta--primary" type="button">Go to Checkout</button>
-        </div>
-      </div>
-    </section>
-
-    <script src="/app.js" defer></script>
+    <script src="/landing-app.js"></script>
   </body>
 </html>
