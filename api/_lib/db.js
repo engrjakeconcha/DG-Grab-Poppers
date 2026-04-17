@@ -151,6 +151,11 @@ async function bootstrapDatabase() {
             type text not null default 'support',
             user_id text not null default '',
             username text not null default '',
+            mobile_number text not null default '',
+            product_type text not null default '',
+            issue_type text not null default '',
+            source text not null default 'web',
+            customer_name text not null default '',
             message text not null default '',
             status text not null default 'open',
             created_at timestamptz not null default now(),
@@ -168,6 +173,14 @@ async function bootstrapDatabase() {
             meta_json jsonb not null default '{}'::jsonb,
             created_at timestamptz not null default now()
           );
+        `);
+
+        await client.query(`
+          alter table tickets add column if not exists mobile_number text not null default '';
+          alter table tickets add column if not exists product_type text not null default '';
+          alter table tickets add column if not exists issue_type text not null default '';
+          alter table tickets add column if not exists source text not null default 'web';
+          alter table tickets add column if not exists customer_name text not null default '';
         `);
       } finally {
         await client.query("select pg_advisory_unlock($1)", [88444051]).catch(() => {});

@@ -9,7 +9,9 @@ const {
   listPromos,
   listProducts,
   listAdminUsers,
+  listTickets,
   requireAdminRole,
+  replyToTicket,
   upsertAdminUser,
   upsertProduct,
   upsertPromo,
@@ -108,6 +110,18 @@ module.exports = async function handler(req, res) {
     if (action === "contact_customer") {
       const result = await contactCustomer(body.order_id, body.message);
       sendJson(res, 200, { ok: true, ...result });
+      return;
+    }
+
+    if (action === "reply_ticket") {
+      const ticket = await replyToTicket(body.ticket_id, body.message, session.username);
+      sendJson(res, 200, { ok: true, ticket });
+      return;
+    }
+
+    if (action === "list_tickets") {
+      const tickets = await listTickets();
+      sendJson(res, 200, { ok: true, tickets });
       return;
     }
 

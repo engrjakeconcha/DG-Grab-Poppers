@@ -134,7 +134,7 @@ body.telegram {
   pointer-events: none;
 }
 
-.service-tile::after {
+.service-tile[data-coming-soon="true"]::after {
   content: "Coming Soon!";
   position: absolute;
   top: 8px;

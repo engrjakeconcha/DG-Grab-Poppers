@@ -47,7 +47,7 @@ COD_FEE = int(os.getenv("COD_FEE", "50"))
 
 # Hosted app URLs
 MINIAPP_URL = os.getenv("MINIAPP_URL", "https://daddygrab.online/").strip()
-REPORT_ISSUE_URL = os.getenv("REPORT_ISSUE_URL", "https://daddygrab.online/report").strip()
+REPORT_ISSUE_URL = os.getenv("REPORT_ISSUE_URL", "https://store.daddygrab.online/report").strip()
 ADMIN_URL = os.getenv("ADMIN_URL", "https://store.daddygrab.online/admin").strip()
 
 # Runtime paths

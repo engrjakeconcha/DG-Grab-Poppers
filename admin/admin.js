@@ -9,6 +9,7 @@ const state = {
   activeTab: "orders",
   orderFilter: "pending",
   orderSearch: "",
+  tickets: [],
   inventory: [],
   promos: [],
   adminUsers: [],
@@ -282,6 +283,93 @@ function renderOrders() {
   });
 }
 
+function renderTickets() {
+  const list = document.getElementById("admin-tickets");
+  const empty = document.getElementById("admin-tickets-empty");
+  const template = document.getElementById("admin-ticket-template");
+  if (!list || !(template instanceof HTMLTemplateElement)) {
+    return;
+  }
+
+  list.innerHTML = "";
+  const tickets = Array.isArray(state.tickets) ? state.tickets : [];
+  if (empty) {
+    empty.hidden = tickets.length > 0;
+  }
+
+  tickets.forEach((ticket) => {
+    const fragment = template.content.cloneNode(true);
+    const node = fragment.querySelector(".admin-order-card");
+    if (!node) {
+      return;
+    }
+
+    const set = (selector, value) => {
+      const target = node.querySelector(selector);
+      if (target) {
+        target.textContent = value;
+      }
+    };
+
+    set(".admin-order-card__title", ticket.ticket_id || "-");
+    set(".admin-ticket-card__status", (ticket.status || "open").replace(/_/g, " "));
+    set(
+      ".admin-ticket-card__meta",
+      [
+        ticket.customer_name || "",
+        ticket.username ? `@${ticket.username}` : "",
+        ticket.mobile_number || "",
+      ]
+        .filter(Boolean)
+        .join(" • ") || "No customer contact info saved."
+    );
+    set(
+      ".admin-ticket-card__summary",
+      [
+        `Product: ${ticket.product_type || "-"}`,
+        `Issue: ${ticket.issue_type || "-"}`,
+        `Source: ${ticket.source || "-"}`,
+        ticket.user_id ? `Telegram ID: ${ticket.user_id}` : "",
+        ticket.updated_at ? `Updated: ${new Date(ticket.updated_at).toLocaleString()}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+    set(".admin-ticket-card__message", ticket.message || "No message attached.");
+
+    const feedback = node.querySelector(".admin-ticket-card__feedback");
+    const replyInput = node.querySelector(".admin-ticket-card__reply");
+    const sendButton = node.querySelector(".admin-ticket-card__send");
+
+    const setCardFeedback = (message, tone = "") => {
+      if (!(feedback instanceof HTMLElement)) {
+        return;
+      }
+      feedback.textContent = message || "";
+      feedback.className = `checkout-feedback admin-ticket-card__feedback${tone ? ` is-${tone}` : ""}`;
+    };
+
+    sendButton?.addEventListener("click", async () => {
+      try {
+        setCardFeedback("Sending reply...");
+        await adminRequest("reply_ticket", {
+          ticket_id: ticket.ticket_id,
+          message: replyInput?.value || "",
+        });
+        setCardFeedback("Reply sent to customer.", "success");
+        if (replyInput instanceof HTMLTextAreaElement) {
+          replyInput.value = "";
+        }
+        await refreshDashboard();
+      } catch (error) {
+        setCardFeedback(error instanceof Error ? error.message : "Failed to send reply.", "error");
+      }
+    });
+
+    list.appendChild(fragment);
+  });
+}
+
 function fillInventoryForm(product) {
   const form = document.getElementById("inventory-form");
   if (!(form instanceof HTMLFormElement) || !product) {
@@ -436,11 +524,13 @@ async function refreshDashboard() {
     limit: 100,
   });
   state.dashboard = result;
+  state.tickets = result.tickets || [];
   state.inventory = result.inventory || [];
   state.promos = result.promos || [];
   state.adminUsers = result.admin_users || [];
   applyOverview();
   renderOrders();
+  renderTickets();
   renderInventory();
   renderPromos();
   renderAdminUsers();

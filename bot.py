@@ -1778,7 +1778,7 @@ def parse_thread_reference_from_bot_message(text: str) -> str:
     """Extract order reference from a bot message when customers reply in private chat."""
     if not text:
         return ""
-    ref_match = re.search(r"Order\s*[:#]?\s*([A-Z0-9\-]{6,})", text, re.IGNORECASE)
+    ref_match = re.search(r"(?:Order|Ticket)\s*[:#]?\s*([A-Z0-9\-]{6,})", text, re.IGNORECASE)
     return ref_match.group(1).strip() if ref_match else ""
 
 
@@ -4093,7 +4093,7 @@ async def admin_group_reply_router(update: Update, context: ContextTypes.DEFAULT
     if not outbound:
         return
 
-    prefix = f"Admin update for order {reference}:\n" if reference else "Admin update:\n"
+    prefix = f"Admin update for ticket {reference}:\n" if reference.startswith("TKT-") else f"Admin update for order {reference}:\n" if reference else "Admin update:\n"
     sent = await context.bot.send_message(
         chat_id=target_user_id,
         text=f"{prefix}{outbound}\n\nReply to this message to continue this thread.",
@@ -4164,7 +4164,7 @@ async def customer_thread_reply_router(update: Update, context: ContextTypes.DEF
     )
 
     adminText = [
-        f"Customer reply for order {reference}",
+        f"Customer reply for {'ticket' if reference.startswith('TKT-') else 'order'} {reference}",
         f"Customer: {sender_name}{f' (@{username})' if username else ''}",
         f"Telegram ID: {update.effective_user.id}",
         f"Telegram Username: @{username}" if username else "",

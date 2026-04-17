@@ -3,18 +3,27 @@
 const { randomUUID, scryptSync, timingSafeEqual } = require("node:crypto");
 const { bootstrapDatabase, query, withClient } = require("./db");
 
+function cleanEnv(value, fallback = "") {
+  const raw = String(value ?? fallback)
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/\\n/g, "")
+    .trim();
+  return raw;
+}
+
 const STORE_NAME = "Daddy Grab Super App";
 const STORE_SLUG = "daddygrab";
-const STORE_BASE_URL = String(process.env.STOREFRONT_PUBLIC_BASE_URL || "https://store.daddygrab.online").trim();
-const TELEGRAM_BOT_TOKEN = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
-const TELEGRAM_ADMIN_GROUP_ID = String(process.env.TELEGRAM_ADMIN_GROUP_ID || "").trim();
+const STORE_BASE_URL = cleanEnv(process.env.STOREFRONT_PUBLIC_BASE_URL, "https://store.daddygrab.online");
+const TELEGRAM_BOT_TOKEN = cleanEnv(process.env.TELEGRAM_BOT_TOKEN);
+const TELEGRAM_ADMIN_GROUP_ID = cleanEnv(process.env.TELEGRAM_ADMIN_GROUP_ID);
 const TELEGRAM_ADMIN_IDS = String(process.env.TELEGRAM_ADMIN_IDS || "")
   .split(",")
-  .map((value) => value.trim())
+  .map((value) => cleanEnv(value))
   .filter(Boolean);
-const RESEND_API_KEY = String(process.env.RESEND_API_KEY || "").trim();
-const RESEND_FROM = String(process.env.RESEND_FROM_EMAIL || "noreply@jcit.digital").trim();
-const RESEND_TO = String(process.env.ORDER_ALERT_EMAIL || RESEND_FROM).trim();
+const RESEND_API_KEY = cleanEnv(process.env.RESEND_API_KEY);
+const RESEND_FROM = cleanEnv(process.env.RESEND_FROM_EMAIL, "noreply@jcit.digital");
+const RESEND_TO = cleanEnv(process.env.ORDER_ALERT_EMAIL, RESEND_FROM);
 
 const DEFAULT_PRODUCTS = [
   {
@@ -366,6 +375,10 @@ function buildOrderId() {
   return `DG-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-${randomUUID().slice(0, 6).toUpperCase()}`;
 }
 
+function buildTicketId() {
+  return `TKT-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-${randomUUID().slice(0, 6).toUpperCase()}`;
+}
+
 async function sendTelegramMessage(chatId, text) {
   if (!TELEGRAM_BOT_TOKEN || !chatId) {
     return false;
@@ -397,6 +410,27 @@ async function sendCustomerOrderNotification(order) {
   return sendTelegramMessage(targetId, lines.join("\n"));
 }
 
+function formatSupportTicketNotification(ticket) {
+  return [
+    `Support Ticket: ${ticket.ticket_id}`,
+    `Status: ${ticket.status}`,
+    `Source: ${ticket.source}`,
+    `Product Type: ${ticket.product_type}`,
+    `Issue Type: ${ticket.issue_type}`,
+    ticket.customer_name ? `Customer: ${ticket.customer_name}` : "",
+    ticket.username ? `Telegram Username: @${ticket.username}` : "",
+    ticket.user_id ? `Telegram ID: ${ticket.user_id}` : "",
+    ticket.mobile_number ? `Mobile: ${ticket.mobile_number}` : "",
+    "",
+    "Message:",
+    ticket.message,
+    "",
+    "Admin note: reply to this message in the admin GC to message the customer, or use the admin portal.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 async function sendOrderEmail(subject, body) {
   if (!RESEND_API_KEY || !RESEND_TO) {
     return false;
@@ -415,6 +449,159 @@ async function sendOrderEmail(subject, body) {
     }),
   });
   return response.ok;
+}
+
+async function listTickets() {
+  await bootstrapStore();
+  const result = await query(`select * from tickets order by created_at desc limit 200`);
+  return result.rows.map((row) => ({
+    ...row,
+    created_at: row.created_at ? new Date(row.created_at).toISOString() : "",
+    updated_at: row.updated_at ? new Date(row.updated_at).toISOString() : "",
+  }));
+}
+
+async function createSupportTicket(payload) {
+  await bootstrapStore();
+
+  const telegramId = String(payload.telegram_id || payload.user_id || "").trim();
+  const telegramUsername = String(payload.telegram_username || payload.username || "").trim().replace(/^@/, "");
+  const customerName = String(payload.customer_name || "").trim();
+  const mobileCheck = validatePhilippineMobileNumber(payload.mobile_number || "");
+  if (!mobileCheck.ok) {
+    throw new Error(mobileCheck.message);
+  }
+
+  const productType = String(payload.product_type || "").trim().toLowerCase();
+  const issueType = String(payload.issue_type || "").trim().toLowerCase();
+  const message = String(payload.message || "").trim();
+  const source = String(payload.source || (telegramId ? "telegram" : "web")).trim() || "web";
+  const allowedProducts = ["grab poppers", "booking", "events"];
+  const allowedIssues = ["order follow up", "customer feedback"];
+
+  if (!telegramUsername && !telegramId) {
+    throw new Error("Please open this form from Telegram or enter your Telegram username.");
+  }
+  if (!allowedProducts.includes(productType)) {
+    throw new Error("Please choose a valid product type.");
+  }
+  if (!allowedIssues.includes(issueType)) {
+    throw new Error("Please choose a valid issue type.");
+  }
+  if (message.length < 8) {
+    throw new Error("Please share a bit more detail so the support team can help.");
+  }
+
+  const ticket = {
+    ticket_id: buildTicketId(),
+    type: "support",
+    user_id: telegramId,
+    username: telegramUsername,
+    mobile_number: mobileCheck.normalized,
+    product_type: productType,
+    issue_type: issueType,
+    source,
+    customer_name: customerName,
+    message,
+    status: "open",
+  };
+
+  await query(
+    `
+      insert into tickets (
+        ticket_id, type, user_id, username, mobile_number, product_type, issue_type, source, customer_name, message, status, created_at, updated_at
+      )
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now())
+    `,
+    [
+      ticket.ticket_id,
+      ticket.type,
+      ticket.user_id,
+      ticket.username,
+      ticket.mobile_number,
+      ticket.product_type,
+      ticket.issue_type,
+      ticket.source,
+      ticket.customer_name,
+      ticket.message,
+      ticket.status,
+    ]
+  );
+
+  const notification = formatSupportTicketNotification(ticket);
+  if (TELEGRAM_ADMIN_GROUP_ID) {
+    await sendTelegramMessage(TELEGRAM_ADMIN_GROUP_ID, notification).catch(() => false);
+  } else {
+    for (const adminId of TELEGRAM_ADMIN_IDS) {
+      await sendTelegramMessage(adminId, notification).catch(() => false);
+    }
+  }
+  await sendOrderEmail(`New CS Ticket- ${ticket.ticket_id}`, notification).catch(() => false);
+
+  if (ticket.user_id) {
+    await sendTelegramMessage(
+      ticket.user_id,
+      [
+        `Your support request ${ticket.ticket_id} has been received.`,
+        "",
+        "The Daddy Grab team has been notified and will reply here or in the admin portal as soon as possible.",
+      ].join("\n")
+    ).catch(() => false);
+  }
+
+  return ticket;
+}
+
+async function replyToTicket(ticketId, message, actor = "") {
+  await bootstrapStore();
+  const normalizedTicketId = String(ticketId || "").trim();
+  const outbound = String(message || "").trim();
+  if (!normalizedTicketId) {
+    throw new Error("Ticket ID is required.");
+  }
+  if (!outbound) {
+    throw new Error("Reply message is required.");
+  }
+
+  const result = await query(`select * from tickets where ticket_id = $1 limit 1`, [normalizedTicketId]);
+  const ticket = result.rows[0];
+  if (!ticket) {
+    throw new Error("Ticket not found.");
+  }
+  if (!ticket.user_id) {
+    throw new Error("This ticket is not linked to a Telegram user ID.");
+  }
+
+  const sent = await sendTelegramMessage(
+    ticket.user_id,
+    [`Support update for ticket ${ticket.ticket_id}:`, outbound].join("\n\n")
+  );
+  if (!sent) {
+    throw new Error("Unable to send Telegram reply for this ticket.");
+  }
+
+  await query(
+    `
+      update tickets
+      set status = 'responded',
+          updated_at = now()
+      where ticket_id = $1
+    `,
+    [normalizedTicketId]
+  );
+
+  if (TELEGRAM_ADMIN_GROUP_ID) {
+    await sendTelegramMessage(
+      TELEGRAM_ADMIN_GROUP_ID,
+      [`Admin reply sent for ticket ${ticket.ticket_id}.`, actor ? `By: ${actor}` : "", outbound].filter(Boolean).join("\n")
+    ).catch(() => false);
+  }
+
+  return {
+    ...ticket,
+    status: "responded",
+    updated_at: nowIso(),
+  };
 }
 
 function formatOrderNotification(order, items) {
@@ -780,7 +967,7 @@ async function adminDashboard(session, filters = {}) {
   });
   const promos = await listPromos();
   const inventory = await listProducts({ includeInactive: true });
-  const ticketsResult = await query(`select * from tickets order by created_at desc limit 100`);
+  const tickets = await listTickets();
   const surveysResult = await query(`select * from surveys order by created_at desc limit 100`);
   const summary = {
     pending_orders: orders.filter((order) => /pending/i.test(order.order_status || "")).length,
@@ -802,7 +989,7 @@ async function adminDashboard(session, filters = {}) {
     orders,
     summary,
     report,
-    tickets: ticketsResult.rows,
+    tickets,
     promos,
     surveys: surveysResult.rows,
     inventory,
@@ -827,17 +1014,20 @@ module.exports = {
   adminDashboard,
   authenticateAdmin,
   bootstrapStore,
+  createSupportTicket,
   contactCustomer,
   createOrder,
   deleteProduct,
   getOrderTracking,
   listAdminUsers,
+  listTickets,
   listProducts,
   listPromos,
   listOrders,
   passcodeHash,
   quoteOrder,
   requireAdminRole,
+  replyToTicket,
   upsertAdminUser,
   upsertProduct,
   upsertPromo,

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Daddy Grab Support Request</title>
+    <meta
+      name="description"
+      content="Send a support request to the Daddy Grab team."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body data-page="report">
+    <div class="page-shell">
+      <header class="hero hero--checkout">
+        <div class="hero__copy">
+          <p class="eyebrow">Customer Support</p>
+          <div class="hero__brand">
+            <img class="hero__logo" src="/Assets/dglogotransparent.png" alt="Daddy Grab logo" />
+            <h1>Support Request Form</h1>
+          </div>
+          <p class="hero__description">
+            Fill this out and we’ll create a customer service ticket right away. The admin GC and admin portal will receive it instantly.
+          </p>
+          <div class="hero__actions">
+            <a class="cta cta--secondary" href="/track">Track Order</a>
+            <a class="cta cta--secondary" href="/">Storefront</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="catalog">
+        <section class="checkout-form">
+          <div class="checkout-shell__head">
+            <div>
+              <p class="eyebrow">Open Ticket</p>
+              <h2>Tell us what happened</h2>
+            </div>
+          </div>
+
+          <form id="support-form" class="form-grid">
+            <input name="telegram_id" type="hidden" />
+            <label class="field">
+              <span>Telegram Username</span>
+              <input name="telegram_username" type="text" placeholder="@username" required />
+              <small class="field-hint">If you opened this from Telegram, we’ll prefill it for you.</small>
+            </label>
+
+            <label class="field">
+              <span>Mobile Number</span>
+              <input name="mobile_number" type="tel" inputmode="tel" placeholder="09XXXXXXXXX" required />
+            </label>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>Type of Product</span>
+                <select name="product_type" required>
+                  <option value="">Select one</option>
+                  <option value="grab poppers">Grab Poppers</option>
+                  <option value="booking">Booking</option>
+                  <option value="events">Events</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Issue Type</span>
+                <select name="issue_type" required>
+                  <option value="">Select one</option>
+                  <option value="order follow up">Order Follow Up</option>
+                  <option value="customer feedback">Customer Feedback</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Message</span>
+              <textarea name="message" rows="5" placeholder="Share the order concern, feedback, or details we should review." required></textarea>
+            </label>
+
+            <div class="payment-guide">
+              <div class="checkout-shell__head">
+                <div>
+                  <p class="eyebrow">Quick Check</p>
+                  <h2>Simple captcha</h2>
+                </div>
+              </div>
+              <div class="field-inline">
+                <label class="field">
+                  <span id="captcha-label">Loading captcha...</span>
+                  <input name="captcha_answer" type="text" inputmode="numeric" placeholder="Answer" required />
+                </label>
+                <button id="refresh-captcha" class="cta cta--secondary cta--inline" type="button">Refresh</button>
+              </div>
+              <small id="captcha-help" class="field-hint">Solve the math question before submitting.</small>
+            </div>
+
+            <button class="cta cta--primary" type="submit">Submit Support Request</button>
+            <div id="support-feedback" class="checkout-feedback" aria-live="polite"></div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="/report/app.js" defer></script>
+  </body>
+</html>

@@ -84,6 +84,7 @@
           <section class="admin-panel admin-tabs-panel">
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button class="admin-tab is-active" type="button" data-admin-tab="orders" role="tab" aria-selected="true">Orders</button>
+              <button class="admin-tab" type="button" data-admin-tab="tickets" role="tab" aria-selected="false">Tickets</button>
               <button class="admin-tab" type="button" data-admin-tab="inventory" role="tab" aria-selected="false">Inventory</button>
               <button class="admin-tab" type="button" data-admin-tab="promos" role="tab" aria-selected="false">Promos</button>
               <button class="admin-tab" type="button" data-admin-tab="admins" role="tab" aria-selected="false">Admins</button>
@@ -114,6 +115,17 @@
             <div id="admin-dashboard-feedback" class="checkout-feedback" aria-live="polite"></div>
             <div id="admin-orders-empty" class="empty-state" hidden>No orders found.</div>
             <div id="admin-orders" class="admin-order-list"></div>
+          </section>
+
+          <section class="admin-panel" data-admin-panel="tickets" hidden>
+            <div class="admin-section-head">
+              <div>
+                <p class="eyebrow">Support</p>
+                <h3>Customer Tickets</h3>
+              </div>
+            </div>
+            <div id="admin-tickets-empty" class="empty-state" hidden>No tickets found.</div>
+            <div id="admin-tickets" class="admin-order-list"></div>
           </section>
 
           <section class="admin-grid" data-admin-panel="inventory" hidden>
@@ -322,6 +334,29 @@
           <a class="cta cta--secondary admin-order-card__track-page" target="_blank" rel="noreferrer">Track Page</a>
         </div>
         <div class="checkout-feedback admin-order-card__feedback" aria-live="polite"></div>
+      </article>
+    </template>
+
+    <template id="admin-ticket-template">
+      <article class="admin-order-card">
+        <div class="admin-order-card__head">
+          <div>
+            <p class="eyebrow admin-order-card__eyebrow">Ticket</p>
+            <h3 class="admin-order-card__title"></h3>
+          </div>
+          <span class="pill admin-ticket-card__status"></span>
+        </div>
+        <div class="admin-order-card__meta admin-ticket-card__meta"></div>
+        <div class="admin-order-card__address admin-ticket-card__summary"></div>
+        <p class="admin-order-card__items admin-ticket-card__message"></p>
+        <label class="field">
+          <span>Reply to Customer</span>
+          <textarea class="admin-ticket-card__reply" rows="3" placeholder="Type a support reply for Telegram."></textarea>
+        </label>
+        <div class="admin-order-card__actions">
+          <button class="cta cta--primary admin-ticket-card__send" type="button">Send Reply</button>
+        </div>
+        <div class="checkout-feedback admin-ticket-card__feedback" aria-live="polite"></div>
       </article>
     </template>
 
