@@ -885,7 +885,7 @@ async function getOrderTracking({ orderId, phone, telegramUsername }) {
   };
 }
 
-async function listOrders({ status = "", search = "", limit = 40 } = {}) {
+async function listOrders({ status = "", search = "", limit = 40, dateFrom = "", dateTo = "" } = {}) {
   await bootstrapStore();
   const params = [];
   const conditions = [];
@@ -905,6 +905,14 @@ async function listOrders({ status = "", search = "", limit = 40 } = {}) {
     conditions.push(
       `(order_id ilike $${params.length} or customer_name ilike $${params.length} or telegram_username ilike $${params.length} or phone_number ilike $${params.length})`
     );
+  }
+  if (dateFrom) {
+    params.push(String(dateFrom).trim());
+    conditions.push(`created_at::date >= $${params.length}::date`);
+  }
+  if (dateTo) {
+    params.push(String(dateTo).trim());
+    conditions.push(`created_at::date <= $${params.length}::date`);
   }
   params.push(Math.max(1, Math.min(200, Number(limit || 40))));
   const sql = `
@@ -964,6 +972,8 @@ async function adminDashboard(session, filters = {}) {
     status: filters.status || "all",
     search: filters.search || "",
     limit: filters.limit || 40,
+    dateFrom: filters.date_from || "",
+    dateTo: filters.date_to || "",
   });
   const promos = await listPromos();
   const inventory = await listProducts({ includeInactive: true });

@@ -83,6 +83,8 @@ module.exports = async function handler(req, res) {
         status: body.status,
         search: body.search,
         limit: body.limit,
+        date_from: body.date_from,
+        date_to: body.date_to,
       });
       sendJson(res, 200, {
         ok: true,

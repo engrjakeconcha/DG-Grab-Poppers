@@ -92,6 +92,7 @@
               <button class="admin-tab" type="button" data-admin-tab="inventory" role="tab" aria-selected="false">Inventory</button>
               <button class="admin-tab" type="button" data-admin-tab="promos" role="tab" aria-selected="false">Promos</button>
               <button class="admin-tab" type="button" data-admin-tab="admins" role="tab" aria-selected="false">Admins</button>
+              <button class="admin-tab" type="button" data-admin-tab="reports" role="tab" aria-selected="false">Reporting</button>
             </div>
           </section>
 
@@ -118,7 +119,7 @@
             </div>
             <div id="admin-dashboard-feedback" class="checkout-feedback" aria-live="polite"></div>
             <div id="admin-orders-empty" class="empty-state" hidden>No orders found.</div>
-            <div id="admin-orders" class="admin-order-list"></div>
+            <div id="admin-orders" class="admin-list"></div>
           </section>
 
           <section class="admin-panel" data-admin-panel="tickets" hidden>
@@ -129,277 +130,99 @@
               </div>
             </div>
             <div id="admin-tickets-empty" class="empty-state" hidden>No tickets found.</div>
-            <div id="admin-tickets" class="admin-order-list"></div>
+            <div id="admin-tickets" class="admin-list"></div>
           </section>
 
-          <section class="admin-grid" data-admin-panel="inventory" hidden>
-            <article class="admin-card admin-card--full">
-              <div class="admin-section-head">
-                <div>
-                  <p class="eyebrow">Inventory</p>
-                  <h3>Products</h3>
-                </div>
+          <section class="admin-panel" data-admin-panel="inventory" hidden>
+            <div class="admin-section-head">
+              <div>
+                <p class="eyebrow">Inventory</p>
+                <h3>Products</h3>
+              </div>
+              <div class="admin-toolbar__actions">
                 <p class="admin-note" id="inventory-note">Super admins can add, edit, and delete products.</p>
+                <button id="inventory-create" class="cta cta--secondary" type="button">New Product</button>
               </div>
-              <form id="inventory-form" class="admin-mini-form">
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>SKU</span>
-                    <input name="sku" type="text" placeholder="DG-POP-001" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Category</span>
-                    <select name="category" required>
-                      <option value="poppers">Poppers</option>
-                      <option value="supplements">Supplements</option>
-                      <option value="toys">Toys</option>
-                      <option value="lubricants">Lubricants</option>
-                    </select>
-                  </label>
-                </div>
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Name</span>
-                    <input name="name" type="text" placeholder="Product name" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Price</span>
-                    <input name="price" type="number" min="0" step="0.01" placeholder="0.00" required />
-                  </label>
-                </div>
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Stock</span>
-                    <input name="stock" type="number" min="0" step="1" placeholder="0" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Status</span>
-                    <select name="active">
-                      <option value="true" selected>Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </label>
-                </div>
-                <label class="field">
-                  <span>Description</span>
-                  <textarea name="description" rows="3" placeholder="Short storefront description"></textarea>
-                </label>
-                <div class="form-grid">
-                  <label class="field">
-                    <span>Image URL</span>
-                    <input name="image_url" type="url" placeholder="https://..." />
-                  </label>
-                  <label class="field">
-                    <span>Or Upload Image</span>
-                    <input id="inventory-image-file" type="file" accept="image/*" />
-                    <small class="field-hint">Temporary MVP upload stores the image as inline data for fast setup.</small>
-                  </label>
-                </div>
-                <button class="cta cta--primary" type="submit">Save Product</button>
-                <div id="inventory-feedback" class="checkout-feedback" aria-live="polite"></div>
-              </form>
-              <div id="admin-inventory" class="admin-mini-list"></div>
-            </article>
+            </div>
+            <div id="inventory-feedback" class="checkout-feedback" aria-live="polite"></div>
+            <div id="admin-inventory-empty" class="empty-state" hidden>No products found.</div>
+            <div id="admin-inventory" class="admin-list"></div>
           </section>
 
-          <section class="admin-grid" data-admin-panel="promos" hidden>
-            <article class="admin-card admin-card--full">
-              <div class="admin-section-head">
-                <div>
-                  <p class="eyebrow">Promo Codes</p>
-                  <h3>Promo Management</h3>
-                </div>
+          <section class="admin-panel" data-admin-panel="promos" hidden>
+            <div class="admin-section-head">
+              <div>
+                <p class="eyebrow">Promo Codes</p>
+                <h3>Promo Management</h3>
+              </div>
+              <div class="admin-toolbar__actions">
                 <p class="admin-note" id="promo-note">Promos are active. Referral and repeat discounts remain disabled.</p>
+                <button id="promo-create" class="cta cta--secondary" type="button">New Promo</button>
               </div>
-              <form id="promo-form" class="admin-mini-form">
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Code</span>
-                    <input name="code" type="text" placeholder="DADDYTEST10" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Discount Type</span>
-                    <select name="discount_type">
-                      <option value="fixed">Fixed</option>
-                      <option value="percent">Percent</option>
-                    </select>
-                  </label>
-                </div>
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Discount Value</span>
-                    <input name="discount_value" type="number" min="0" step="0.01" placeholder="10" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Status</span>
-                    <select name="active">
-                      <option value="true" selected>Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </label>
-                </div>
-                <label class="field">
-                  <span>Notes</span>
-                  <textarea name="notes" rows="2" placeholder="Internal promo note"></textarea>
-                </label>
-                <button class="cta cta--primary" type="submit">Save Promo</button>
-                <div id="promo-feedback" class="checkout-feedback" aria-live="polite"></div>
-              </form>
-              <div id="admin-promos" class="admin-mini-list"></div>
-            </article>
+            </div>
+            <div id="promo-feedback" class="checkout-feedback" aria-live="polite"></div>
+            <div id="admin-promos-empty" class="empty-state" hidden>No promos found.</div>
+            <div id="admin-promos" class="admin-list"></div>
           </section>
 
-          <section class="admin-grid" data-admin-panel="admins" hidden>
-            <article class="admin-card admin-card--full">
-              <div class="admin-section-head">
-                <div>
-                  <p class="eyebrow">Admin Access</p>
-                  <h3>Manage Admin Users</h3>
-                </div>
-                <p class="admin-note" id="admin-note">Only super admins can create or rotate admin logins.</p>
+          <section class="admin-panel" data-admin-panel="admins" hidden>
+            <div class="admin-section-head">
+              <div>
+                <p class="eyebrow">Admin Access</p>
+                <h3>Manage Admin Users</h3>
               </div>
-              <form id="admin-user-form" class="admin-mini-form">
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Username</span>
-                    <input name="username" type="text" placeholder="Admin username" required />
-                  </label>
-                  <label class="field field--compact">
-                    <span>Passcode</span>
-                    <input name="passcode" type="password" placeholder="Temporary passcode" required />
-                  </label>
-                </div>
-                <div class="form-grid">
-                  <label class="field field--compact">
-                    <span>Access Level</span>
-                    <select name="access_level">
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super Admin</option>
-                    </select>
-                  </label>
-                  <label class="field field--compact">
-                    <span>Telegram ID</span>
-                    <input name="telegram_id" type="text" placeholder="Optional" />
-                  </label>
-                </div>
-                <label class="field field--compact">
-                  <span>Telegram Username</span>
-                  <input name="telegram_username" type="text" placeholder="@username" />
-                </label>
-                <button class="cta cta--primary" type="submit">Save Admin User</button>
-                <div id="admin-user-feedback" class="checkout-feedback" aria-live="polite"></div>
-              </form>
-              <div id="admin-users" class="admin-mini-list"></div>
-            </article>
+              <div class="admin-toolbar__actions">
+                <p class="admin-note" id="admin-note">Only super admins can create or rotate admin logins.</p>
+                <button id="admin-user-create" class="cta cta--secondary" type="button">New Admin</button>
+              </div>
+            </div>
+            <div id="admin-user-feedback" class="checkout-feedback" aria-live="polite"></div>
+            <div id="admin-users-empty" class="empty-state" hidden>No admin users found.</div>
+            <div id="admin-users" class="admin-list"></div>
+          </section>
+
+          <section class="admin-panel" data-admin-panel="reports" hidden>
+            <div class="admin-section-head">
+              <div>
+                <p class="eyebrow">Reporting</p>
+                <h3>Sales & Inventory Reports</h3>
+              </div>
+            </div>
+            <div class="admin-filter-row">
+              <label class="field field--compact">
+                <span>From</span>
+                <input id="report-date-from" type="date" />
+              </label>
+              <label class="field field--compact">
+                <span>To</span>
+                <input id="report-date-to" type="date" />
+              </label>
+              <button id="report-apply" class="cta cta--secondary" type="button">Apply Range</button>
+            </div>
+            <div class="admin-toolbar__actions">
+              <button id="export-sales-report" class="cta cta--secondary" type="button">Export Full Sales Report</button>
+              <button id="export-inventory-report" class="cta cta--secondary" type="button">Export Inventory Report</button>
+            </div>
+            <div id="reporting-feedback" class="checkout-feedback" aria-live="polite"></div>
+            <div id="reporting-summary" class="admin-list admin-list--report"></div>
           </section>
         </section>
       </main>
     </div>
 
-    <template id="admin-order-template">
-      <article class="admin-order-card">
-        <div class="admin-order-card__head">
+    <section id="admin-modal" class="order-success admin-modal" hidden>
+      <div class="order-success__backdrop" data-admin-modal-close></div>
+      <div class="order-success__card admin-modal__card" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <div class="admin-modal__head">
           <div>
-            <p class="eyebrow admin-order-card__eyebrow">Order</p>
-            <h3 class="admin-order-card__title"></h3>
+            <p id="admin-modal-kicker" class="order-success__eyebrow">Details</p>
+            <h2 id="admin-modal-title">Admin Details</h2>
           </div>
-          <span class="pill admin-order-card__status"></span>
+          <button class="cta cta--secondary" type="button" data-admin-modal-close>Close</button>
         </div>
-        <div class="admin-order-card__meta"></div>
-        <div class="admin-order-card__address"></div>
-        <p class="admin-order-card__items"></p>
-        <div class="admin-order-card__totals"></div>
-        <div class="admin-order-card__controls">
-          <label class="field field--compact">
-            <span>Status</span>
-            <select class="admin-order-card__status-input">
-              <option value="Pending Confirmation">Pending Confirmation</option>
-              <option value="Awaiting Payment">Awaiting Payment</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Preparing">Preparing</option>
-              <option value="Out for Delivery">Out for Delivery</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </label>
-          <label class="field field--compact">
-            <span>Tracking Number</span>
-            <input class="admin-order-card__tracking-input" type="text" placeholder="Optional tracking number" />
-          </label>
-        </div>
-        <label class="field">
-          <span>Message to Customer</span>
-          <textarea class="admin-order-card__message" rows="3" placeholder="Type a delivery update or support note."></textarea>
-        </label>
-        <div class="admin-order-card__actions">
-          <button class="cta cta--primary admin-order-card__save" type="button">Save Update</button>
-          <button class="cta cta--secondary admin-order-card__contact" type="button">Send Message</button>
-          <a class="cta cta--secondary admin-order-card__track-page" target="_blank" rel="noreferrer">Track Page</a>
-        </div>
-        <div class="checkout-feedback admin-order-card__feedback" aria-live="polite"></div>
-      </article>
-    </template>
-
-    <template id="admin-ticket-template">
-      <article class="admin-order-card">
-        <div class="admin-order-card__head">
-          <div>
-            <p class="eyebrow admin-order-card__eyebrow">Ticket</p>
-            <h3 class="admin-order-card__title"></h3>
-          </div>
-          <span class="pill admin-ticket-card__status"></span>
-        </div>
-        <div class="admin-order-card__meta admin-ticket-card__meta"></div>
-        <div class="admin-order-card__address admin-ticket-card__summary"></div>
-        <p class="admin-order-card__items admin-ticket-card__message"></p>
-        <label class="field">
-          <span>Reply to Customer</span>
-          <textarea class="admin-ticket-card__reply" rows="3" placeholder="Type a support reply for Telegram."></textarea>
-        </label>
-        <div class="admin-order-card__actions">
-          <button class="cta cta--primary admin-ticket-card__send" type="button">Send Reply</button>
-        </div>
-        <div class="checkout-feedback admin-ticket-card__feedback" aria-live="polite"></div>
-      </article>
-    </template>
-
-    <template id="admin-inventory-template">
-      <article class="admin-mini-card admin-inventory-card">
-        <div class="admin-mini-card__head">
-          <strong class="admin-inventory__title"></strong>
-          <span class="pill admin-inventory__sku"></span>
-        </div>
-        <p class="admin-mini-card__copy admin-inventory__meta"></p>
-        <p class="admin-mini-card__copy admin-inventory__description"></p>
-        <div class="admin-mini-card__actions">
-          <button class="cta cta--secondary admin-inventory__edit" type="button">Edit</button>
-          <button class="cta cta--secondary admin-inventory__delete" type="button">Delete</button>
-        </div>
-        <div class="checkout-feedback admin-inventory__feedback" aria-live="polite"></div>
-      </article>
-    </template>
-
-    <template id="admin-promo-template">
-      <article class="admin-mini-card">
-        <div class="admin-mini-card__head">
-          <strong class="admin-promo__code"></strong>
-          <span class="pill admin-promo__state"></span>
-        </div>
-        <p class="admin-mini-card__copy admin-promo__discount"></p>
-        <p class="admin-mini-card__copy admin-promo__notes"></p>
-      </article>
-    </template>
-
-    <template id="admin-user-template">
-      <article class="admin-mini-card">
-        <div class="admin-mini-card__head">
-          <strong class="admin-user__title"></strong>
-          <span class="pill admin-user__state"></span>
-        </div>
-        <p class="admin-mini-card__copy admin-user__meta"></p>
-      </article>
-    </template>
+        <div id="admin-modal-body" class="admin-modal__body"></div>
+      </div>
+    </section>
 
     <script src="/admin/admin.js" defer></script>
   </body>

@@ -255,7 +255,7 @@ img {
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -521,6 +521,84 @@ img {
 .admin-dashboard {
   display: grid;
   gap: 18px;
+}
+
+.admin-list,
+.admin-list--report {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-list-row__copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.admin-list-row__title,
+.admin-modal__head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.admin-list-row__meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.admin-list-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.admin-list-row__button {
+  min-height: 34px;
+  padding-inline: 12px;
+}
+
+.admin-modal__card {
+  width: min(760px, 100%);
+}
+
+.admin-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-modal__body,
+.admin-modal-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-modal-block {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .admin-metrics {
