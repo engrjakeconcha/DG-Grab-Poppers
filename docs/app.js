@@ -14,12 +14,19 @@
   }
 
   document.querySelectorAll("[data-telegram='true']").forEach((link) => {
-    link.addEventListener("click", function () {
+    link.addEventListener("click", function (event) {
       if (!tg) return;
       try {
         tg.HapticFeedback.selectionChanged();
       } catch (error) {
         console.debug("Telegram haptic skipped", error);
+      }
+
+      if (link.dataset.miniappRoute === "true") {
+        const href = link.getAttribute("href");
+        if (!href) return;
+        event.preventDefault();
+        window.location.assign(href);
       }
     });
   });
