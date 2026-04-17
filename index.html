@@ -57,11 +57,48 @@
           <p class="product-card__description"></p>
           <div class="product-card__footer">
             <strong class="product-card__price"></strong>
+            <button class="product-card__quickview cta cta--secondary" type="button">Quick View</button>
             <button class="product-card__button" type="button">Add to Cart</button>
           </div>
         </div>
       </article>
     </template>
+
+    <section id="quick-view" class="product-quickview" hidden>
+      <button class="product-quickview__backdrop" type="button" data-quickview-close aria-label="Close quick view"></button>
+      <div class="product-quickview__card" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
+        <button class="product-quickview__close" type="button" data-quickview-close aria-label="Close quick view">×</button>
+        <div class="product-quickview__media">
+          <img id="quick-view-image" class="product-quickview__image" alt="" />
+        </div>
+        <div class="product-quickview__copy">
+          <p id="quick-view-category" class="product-quickview__category"></p>
+          <h2 id="quick-view-title"></h2>
+          <p id="quick-view-description" class="product-quickview__description"></p>
+          <div class="product-quickview__meta">
+            <strong id="quick-view-price"></strong>
+            <span id="quick-view-stock"></span>
+          </div>
+          <div class="product-quickview__actions">
+            <button id="quick-view-add" class="cta cta--primary" type="button">Add to Cart</button>
+            <button class="cta cta--secondary" type="button" data-quickview-close>Close</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cart-toast" class="cart-toast" hidden aria-live="polite">
+      <div class="cart-toast__card">
+        <div class="cart-toast__copy">
+          <strong id="cart-toast-title">Added to cart</strong>
+          <p id="cart-toast-message"></p>
+        </div>
+        <div class="cart-toast__actions">
+          <button id="cart-toast-continue" class="cta cta--secondary" type="button">Continue Shopping</button>
+          <button id="cart-toast-checkout" class="cta cta--primary" type="button">Go to Checkout</button>
+        </div>
+      </div>
+    </section>
 
     <script src="/app.js" defer></script>
   </body>

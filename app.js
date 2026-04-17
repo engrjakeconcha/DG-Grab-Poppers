@@ -30,6 +30,8 @@ const state = {
   search: "",
   cart: readJson(STORAGE_KEYS.cart, { cart_session_id: makeCartSessionId(), items: [] }),
   lastQuote: null,
+  quickViewProduct: null,
+  cartToastTimer: null,
 };
 
 function currentPage() {
@@ -223,6 +225,7 @@ function renderProducts() {
     const title = node.querySelector(".product-card__title");
     const description = node.querySelector(".product-card__description");
     const price = node.querySelector(".product-card__price");
+    const quickView = node.querySelector(".product-card__quickview");
     const button = node.querySelector(".product-card__button");
     if (image) {
       image.src = product.image_url || STORE.fallbackImage;
@@ -233,6 +236,9 @@ function renderProducts() {
     if (title) title.textContent = product.name;
     if (description) description.textContent = product.description;
     if (price) price.textContent = peso(product.price);
+    if (quickView) {
+      quickView.addEventListener("click", () => openQuickView(product));
+    }
     if (button) {
       button.addEventListener("click", () => addToCart(product));
     }
@@ -256,6 +262,73 @@ function addToCart(product) {
   persistCart();
   renderCartBadge();
   renderCheckout();
+  showCartToast(product);
+}
+
+function openQuickView(product) {
+  state.quickViewProduct = product;
+  const wrap = document.getElementById("quick-view");
+  if (!wrap) return;
+  const image = document.getElementById("quick-view-image");
+  const category = document.getElementById("quick-view-category");
+  const title = document.getElementById("quick-view-title");
+  const description = document.getElementById("quick-view-description");
+  const price = document.getElementById("quick-view-price");
+  const stock = document.getElementById("quick-view-stock");
+  const addButton = document.getElementById("quick-view-add");
+  if (image) {
+    image.src = product.image_url || STORE.fallbackImage;
+    image.alt = product.name;
+  }
+  if (category) category.textContent = product.category;
+  if (title) title.textContent = product.name;
+  if (description) description.textContent = product.description;
+  if (price) price.textContent = peso(product.price);
+  if (stock) stock.textContent = `${product.stock} in stock`;
+  if (addButton) {
+    addButton.onclick = () => {
+      addToCart(product);
+      closeQuickView();
+    };
+  }
+  wrap.hidden = false;
+}
+
+function closeQuickView() {
+  state.quickViewProduct = null;
+  const wrap = document.getElementById("quick-view");
+  if (!wrap) return;
+  wrap.hidden = true;
+}
+
+function showCartToast(product) {
+  const wrap = document.getElementById("cart-toast");
+  const message = document.getElementById("cart-toast-message");
+  const continueButton = document.getElementById("cart-toast-continue");
+  const checkoutButton = document.getElementById("cart-toast-checkout");
+  if (!wrap || !message) return;
+  message.textContent = `${product.name} is in your cart. Ready when you are.`;
+  wrap.hidden = false;
+  if (state.cartToastTimer) {
+    window.clearTimeout(state.cartToastTimer);
+  }
+  continueButton.onclick = () => hideCartToast();
+  checkoutButton.onclick = () => {
+    hideCartToast();
+    window.location.href = "/checkout";
+  };
+  state.cartToastTimer = window.setTimeout(() => {
+    hideCartToast();
+  }, 3200);
+}
+
+function hideCartToast() {
+  const wrap = document.getElementById("cart-toast");
+  if (state.cartToastTimer) {
+    window.clearTimeout(state.cartToastTimer);
+    state.cartToastTimer = null;
+  }
+  if (wrap) wrap.hidden = true;
 }
 
 function changeQty(sku, delta) {
@@ -681,6 +754,15 @@ function bindNavigation() {
     const form = document.getElementById("checkout-form");
     persistCheckoutDraft(form);
     window.location.href = "/address";
+  });
+  document.querySelectorAll("[data-quickview-close]").forEach((button) => {
+    button.addEventListener("click", closeQuickView);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeQuickView();
+      hideCartToast();
+    }
   });
 }
 
