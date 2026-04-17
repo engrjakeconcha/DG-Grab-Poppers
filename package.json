@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Daddy Grab storefront, landing page, and Telegram bot",
   "scripts": {
-    "check": "node -c app.js && node -c admin/admin.js && node -c api/_lib/db.js && node -c api/_lib/store.js && node -c api/admin/daddygrab-admin.js && node -c api/storefront/daddygrab-checkout.js && node -c api/storefront/daddygrab-track.js && node -c api/storefront/daddygrab-catalog.js"
+    "check": "node -c app.js && node -c admin/admin.js && node -c api/_lib/db.js && node -c api/_lib/store.js && node -c api/admin/daddygrab-admin.js && node -c api/storefront/daddygrab-checkout.js && node -c api/storefront/daddygrab-track.js && node -c api/storefront/daddygrab-catalog.js && node -c storefront-api-server.js"
   },
   "dependencies": {
     "pg": "^8.13.1"

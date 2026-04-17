@@ -1,0 +1,15 @@
+[Unit]
+Description=Daddy Grab Storefront API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/daddygrab-storefront/current
+EnvironmentFile=/opt/daddygrab-storefront/current/.env
+ExecStart=/usr/bin/node /opt/daddygrab-storefront/current/storefront-api-server.js
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
