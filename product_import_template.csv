@@ -1,0 +1,5 @@
+sku,category,name,description,price,image_url,active,stock
+DG-POP-001,poppers,,,0,,true,0
+DG-SUP-001,supplements,,,0,,true,0
+DG-TOY-001,toys,,,0,,true,0
+DG-LUBE-001,lubricants,,,0,,true,0

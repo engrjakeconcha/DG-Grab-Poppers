@@ -67,6 +67,8 @@ const DEFAULT_ADMINS = [
   { username: "Admin1", passcode: "010101", access_level: "admin", created_by: "system" },
 ];
 
+let bootstrapStorePromise;
+
 function passcodeHash(passcode) {
   return scryptSync(String(passcode || ""), "daddy-grab-admin-salt", 64).toString("hex");
 }
@@ -104,45 +106,53 @@ function validatePhilippineMobileNumber(value) {
 }
 
 async function bootstrapStore() {
-  await bootstrapDatabase();
-  for (const product of DEFAULT_PRODUCTS) {
-    await query(
-      `
-        insert into products (sku, category, name, description, price, image_url, active, stock)
-        values ($1,$2,$3,$4,$5,$6,true,$7)
-        on conflict (sku) do nothing
-      `,
-      [
-        product.sku,
-        product.category,
-        product.name,
-        product.description,
-        product.price,
-        product.image_url,
-        product.stock,
-      ]
-    );
-  }
+  if (!bootstrapStorePromise) {
+    bootstrapStorePromise = (async () => {
+      await bootstrapDatabase();
+      for (const product of DEFAULT_PRODUCTS) {
+        await query(
+          `
+            insert into products (sku, category, name, description, price, image_url, active, stock)
+            values ($1,$2,$3,$4,$5,$6,true,$7)
+            on conflict (sku) do nothing
+          `,
+          [
+            product.sku,
+            product.category,
+            product.name,
+            product.description,
+            product.price,
+            product.image_url,
+            product.stock,
+          ]
+        );
+      }
 
-  await query(
-    `
-      insert into promos (code, discount_type, discount_value, active, notes)
-      values ($1,$2,$3,true,$4)
-      on conflict (code) do nothing
-    `,
-    [DEFAULT_PROMO.code, DEFAULT_PROMO.discount_type, DEFAULT_PROMO.discount_value, DEFAULT_PROMO.notes]
-  );
+      await query(
+        `
+          insert into promos (code, discount_type, discount_value, active, notes)
+          values ($1,$2,$3,true,$4)
+          on conflict (code) do nothing
+        `,
+        [DEFAULT_PROMO.code, DEFAULT_PROMO.discount_type, DEFAULT_PROMO.discount_value, DEFAULT_PROMO.notes]
+      );
 
-  for (const admin of DEFAULT_ADMINS) {
-    await query(
-      `
-        insert into admin_users (username, passcode_hash, access_level, active, created_by)
-        values ($1,$2,$3,true,$4)
-        on conflict (username) do nothing
-      `,
-      [admin.username, passcodeHash(admin.passcode), admin.access_level, admin.created_by]
-    );
+      for (const admin of DEFAULT_ADMINS) {
+        await query(
+          `
+            insert into admin_users (username, passcode_hash, access_level, active, created_by)
+            values ($1,$2,$3,true,$4)
+            on conflict (username) do nothing
+          `,
+          [admin.username, passcodeHash(admin.passcode), admin.access_level, admin.created_by]
+        );
+      }
+    })().catch((error) => {
+      bootstrapStorePromise = null;
+      throw error;
+    });
   }
+  return bootstrapStorePromise;
 }
 
 async function listProducts({ includeInactive = false } = {}) {

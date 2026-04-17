@@ -1,6 +1,6 @@
 "use strict";
 
-const { bootstrapStore, getOrderTracking, updateOrder } = require("../_lib/store");
+const { getOrderTracking, updateOrder } = require("../_lib/store");
 
 function sendJson(res, status, body) {
   res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
@@ -30,7 +30,6 @@ function parseBody(req) {
 
 module.exports = async function handler(req, res) {
   try {
-    await bootstrapStore();
     if (req.method === "POST") {
       const body = await parseBody(req);
       if (body.action === "mark_completed" && body.order_id) {

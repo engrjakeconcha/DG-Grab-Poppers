@@ -1,6 +1,6 @@
 "use strict";
 
-const { STORE_NAME, STORE_SLUG, STORE_BASE_URL, bootstrapStore, listProducts, listPromos } = require("../_lib/store");
+const { STORE_NAME, STORE_SLUG, STORE_BASE_URL, listProducts, listPromos } = require("../_lib/store");
 
 function sendJson(res, status, body) {
   res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
@@ -14,7 +14,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    await bootstrapStore();
     const [products, promos] = await Promise.all([listProducts(), listPromos()]);
     sendJson(res, 200, {
       ok: true,

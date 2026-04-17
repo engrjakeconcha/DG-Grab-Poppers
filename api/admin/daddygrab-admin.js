@@ -65,7 +65,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    await bootstrapStore();
     const body = await parseBody(req);
     const action = String(body.action || "").trim();
 
