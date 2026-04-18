@@ -104,6 +104,15 @@ module.exports = async function handler(req, res) {
       const order = await updateOrder(body.order_id, {
         status: body.status,
         tracking_number: body.tracking_number,
+        customer_name: body.customer_name,
+        phone_number: body.phone_number,
+        delivery_area: body.delivery_area,
+        delivery_address: body.delivery_address,
+        payment_method: body.payment_method,
+        payment_status: body.payment_status,
+        notes: body.notes,
+        items: body.items,
+        actor_role: session.access_level,
       });
       sendJson(res, 200, { ok: true, order, customer_notified: false });
       return;

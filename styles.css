@@ -529,6 +529,84 @@ img {
   gap: 12px;
 }
 
+.admin-view-picker {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-table-shell {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-table,
+.admin-table--head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-table {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-table--head {
+  padding: 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-table-body {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-table__cell {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-table__cell--primary {
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.admin-table__cell--secondary {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.admin-table__cell--action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-line-editor {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.admin-line-editor__remove {
+  width: 100%;
+}
+
 .admin-list-row {
   display: flex;
   align-items: center;
@@ -925,6 +1003,15 @@ img {
   .admin-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-view-picker {
+    display: none;
+  }
+
+  .admin-line-editor {
+    grid-template-columns: minmax(0, 1.4fr) 120px auto;
+    align-items: end;
+  }
 }
 
 @media (min-width: 1040px) {
@@ -934,5 +1021,32 @@ img {
 
   .admin-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 719px) {
+  .admin-tabs {
+    display: none;
+  }
+
+  .admin-table--head {
+    display: none;
+  }
+
+  .admin-table {
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .admin-table__cell--primary,
+  .admin-table__cell--secondary {
+    grid-column: 1 / 2;
+  }
+
+  .admin-table__cell--action {
+    grid-column: 2 / 3;
+    grid-row: 1 / span 2;
+    flex-direction: column;
+    align-items: flex-end;
   }
 }

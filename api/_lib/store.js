@@ -114,6 +114,41 @@ function validatePhilippineMobileNumber(value) {
   };
 }
 
+const ORDER_STATUS_FLOW = [
+  "Awaiting Payment Confirmation",
+  "Payment Confirmed",
+  "Preparing",
+  "For Delivery",
+  "Out for Delivery",
+  "Delivered",
+];
+
+function canonicalizeOrderStatus(value, fallback = "Awaiting Payment Confirmation") {
+  const raw = String(value || "").trim().toLowerCase();
+  if (!raw) {
+    return fallback;
+  }
+  if (raw === "pending confirmation" || raw === "pending" || raw === "awaiting payment" || raw === "awaiting_payment") {
+    return "Awaiting Payment Confirmation";
+  }
+  if (raw === "confirmed" || raw === "payment confirmed" || raw === "paid") {
+    return "Payment Confirmed";
+  }
+  if (raw === "preparing") {
+    return "Preparing";
+  }
+  if (raw === "for delivery") {
+    return "For Delivery";
+  }
+  if (raw === "out for delivery") {
+    return "Out for Delivery";
+  }
+  if (raw === "delivered" || raw === "completed") {
+    return "Delivered";
+  }
+  return fallback;
+}
+
 async function bootstrapStore() {
   if (!bootstrapStorePromise) {
     bootstrapStorePromise = (async () => {
@@ -682,7 +717,7 @@ async function createOrder(payload) {
     address_verification_notes: String(payload.address_verification_notes || "").trim(),
     payment_method: paymentMethod,
     payment_status: paymentMethod === "Cash on Delivery" ? "pay_on_delivery" : "awaiting_payment",
-    order_status: "Pending Confirmation",
+    order_status: "Awaiting Payment Confirmation",
     delivery_method: deliveryMethod,
     tracking_number: "",
     promo_code: promo ? promo.code : "",
@@ -892,9 +927,19 @@ async function listOrders({ status = "", search = "", limit = 40, dateFrom = "",
   if (status && status !== "all") {
     const normalizedStatus = String(status).trim().toLowerCase();
     if (normalizedStatus === "pending") {
-      conditions.push(`order_status ilike 'Pending%'`);
+      conditions.push(`(order_status ilike 'Pending%' or order_status = 'Awaiting Payment Confirmation')`);
     } else if (normalizedStatus === "awaiting_payment") {
       conditions.push(`payment_status = 'awaiting_payment'`);
+    } else if (normalizedStatus === "payment_confirmed") {
+      conditions.push(`order_status = 'Payment Confirmed'`);
+    } else if (normalizedStatus === "preparing") {
+      conditions.push(`order_status = 'Preparing'`);
+    } else if (normalizedStatus === "for_delivery") {
+      conditions.push(`order_status = 'For Delivery'`);
+    } else if (normalizedStatus === "out_for_delivery") {
+      conditions.push(`order_status = 'Out for Delivery'`);
+    } else if (normalizedStatus === "delivered") {
+      conditions.push(`order_status = 'Delivered'`);
     } else {
       params.push(status);
       conditions.push(`order_status = $${params.length}`);
@@ -948,22 +993,133 @@ async function updateOrder(orderId, patch) {
   if (!current) {
     throw new Error("Order not found.");
   }
-  const next = {
-    status: String(patch.status || current.order_status).trim(),
-    tracking_number: String(patch.tracking_number || current.tracking_number || "").trim(),
-  };
-  const result = await query(
-    `
-      update orders
-      set order_status = $2,
-          tracking_number = $3,
-          updated_at = now()
-      where order_id = $1
-      returning *
-    `,
-    [orderId, next.status, next.tracking_number]
-  );
-  return result.rows[0];
+  const actorRole = String(patch.actor_role || "").trim();
+  const isSuperAdmin = actorRole === "super_admin";
+  const nextStatus = canonicalizeOrderStatus(patch.status, canonicalizeOrderStatus(current.order_status));
+  const nextTrackingNumber = String(patch.tracking_number || current.tracking_number || "").trim();
+  const nextPaymentStatus = String(
+    patch.payment_status ||
+      (nextStatus === "Delivered" || nextStatus === "Payment Confirmed"
+        ? "paid"
+        : current.payment_status || "awaiting_payment")
+  ).trim();
+
+  let nextOrder = null;
+
+  await withClient(async (client) => {
+    await client.query("begin");
+    try {
+      let subtotal = normalizeMoney(current.subtotal || 0);
+      let total = normalizeMoney(current.total || 0);
+      if (isSuperAdmin && Array.isArray(patch.items)) {
+        if (!patch.items.length) {
+          throw new Error("At least one order item is required.");
+        }
+        const normalizedItems = [];
+        for (const rawItem of patch.items) {
+          const sku = String(rawItem.sku || "").trim().toUpperCase();
+          const quantity = Math.max(1, Number(rawItem.quantity || rawItem.qty || 1));
+          if (!sku) {
+            throw new Error("Every order item needs a product.");
+          }
+          const productResult = await client.query(
+            `select sku, name, category, price from products where sku = $1 limit 1`,
+            [sku]
+          );
+          const product = productResult.rows[0];
+          if (!product) {
+            throw new Error(`Product not found for SKU ${sku}.`);
+          }
+          const unitPrice = normalizeMoney(product.price);
+          normalizedItems.push({
+            sku,
+            name: product.name,
+            category: product.category,
+            quantity,
+            unit_price: unitPrice,
+            line_total: normalizeMoney(unitPrice * quantity),
+          });
+        }
+        subtotal = normalizeMoney(normalizedItems.reduce((sum, item) => sum + Number(item.line_total || 0), 0));
+        total = Math.max(
+          0,
+          normalizeMoney(
+            subtotal +
+              normalizeMoney(current.shipping_fee || 0) -
+              normalizeMoney(current.promo_discount || 0) -
+              normalizeMoney(current.referral_discount || 0) -
+              normalizeMoney(current.repeat_discount || 0)
+          )
+        );
+        await client.query(`delete from order_items where order_id = $1`, [orderId]);
+        for (const item of normalizedItems) {
+          await client.query(
+            `
+              insert into order_items (order_id, sku, name, category, quantity, unit_price, line_total)
+              values ($1,$2,$3,$4,$5,$6,$7)
+            `,
+            [orderId, item.sku, item.name, item.category, item.quantity, item.unit_price, item.line_total]
+          );
+        }
+      }
+
+      const values = [
+        orderId,
+        nextStatus,
+        nextTrackingNumber,
+        nextPaymentStatus,
+      ];
+
+      let sql = `
+        update orders
+        set order_status = $2,
+            tracking_number = $3,
+            payment_status = $4,
+      `;
+
+      if (isSuperAdmin) {
+        const phoneCheck = validatePhilippineMobileNumber(patch.phone_number || current.phone_number || "");
+        if (!phoneCheck.ok) {
+          throw new Error(phoneCheck.message);
+        }
+        values.push(
+          String(patch.customer_name || current.customer_name || "").trim(),
+          phoneCheck.normalized,
+          String(patch.delivery_area || current.delivery_area || "Metro Manila").trim() || "Metro Manila",
+          String(patch.delivery_address || current.delivery_address || "").trim(),
+          String(patch.payment_method || current.payment_method || "").trim(),
+          String(patch.notes || current.notes || "").trim(),
+          subtotal,
+          total
+        );
+        sql += `
+            customer_name = $5,
+            phone_number = $6,
+            delivery_area = $7,
+            delivery_address = $8,
+            payment_method = $9,
+            notes = $10,
+            subtotal = $11,
+            total = $12,
+        `;
+      }
+
+      sql += `
+            updated_at = now()
+        where order_id = $1
+        returning *
+      `;
+
+      const result = await client.query(sql, values);
+      nextOrder = result.rows[0];
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    }
+  });
+
+  return nextOrder;
 }
 
 async function adminDashboard(session, filters = {}) {
@@ -980,17 +1136,19 @@ async function adminDashboard(session, filters = {}) {
   const tickets = await listTickets();
   const surveysResult = await query(`select * from surveys order by created_at desc limit 100`);
   const summary = {
-    pending_orders: orders.filter((order) => /pending/i.test(order.order_status || "")).length,
+    pending_orders: orders.filter((order) => canonicalizeOrderStatus(order.order_status) === "Awaiting Payment Confirmation").length,
     awaiting_payment: orders.filter((order) => /payment/i.test(order.payment_status || "")).length,
   };
-  const grossSales = orders.reduce((sum, order) => sum + normalizeMoney(order.total), 0);
-  const orderCount = orders.length;
+  const deliveredOrders = orders.filter((order) => canonicalizeOrderStatus(order.order_status) === "Delivered");
+  const grossSales = deliveredOrders.reduce((sum, order) => sum + normalizeMoney(order.total), 0);
+  const orderCount = deliveredOrders.length;
   const report = {
     gross_sales: grossSales,
     order_count: orderCount,
     average_order_value: orderCount ? grossSales / orderCount : 0,
     by_status: orders.reduce((acc, order) => {
-      acc[order.order_status || "Unknown"] = (acc[order.order_status || "Unknown"] || 0) + 1;
+      const key = canonicalizeOrderStatus(order.order_status, order.order_status || "Unknown");
+      acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {}),
   };

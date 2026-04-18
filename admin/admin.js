@@ -3,15 +3,15 @@
 const ADMIN_SESSION_KEY = "daddygrab_admin_session";
 const ADMIN_API_URL = "/api/admin/daddygrab-admin";
 const ORDER_STATUSES = [
-  "Pending Confirmation",
-  "Awaiting Payment",
-  "Confirmed",
+  "Awaiting Payment Confirmation",
+  "Payment Confirmed",
   "Preparing",
+  "For Delivery",
   "Out for Delivery",
   "Delivered",
-  "Completed",
-  "Cancelled",
 ];
+const PAYMENT_METHOD_OPTIONS = ["Maya", "GCash", "Bank Transfer", "Cash on Delivery"];
+const INVENTORY_CATEGORIES = ["poppers", "supplements", "toys", "lubricants"];
 
 const state = {
   session: null,
@@ -19,6 +19,7 @@ const state = {
   activeTab: "orders",
   orderFilter: "pending",
   orderSearch: "",
+  inventoryFilter: "all",
   reportDateFrom: "",
   reportDateTo: "",
   tickets: [],
@@ -33,6 +34,28 @@ function peso(value) {
     currency: "PHP",
     maximumFractionDigits: 2,
   }).format(Number(value || 0));
+}
+
+function titleize(value) {
+  return String(value || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function normalizeOrderStatus(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (!raw) return "Awaiting Payment Confirmation";
+  if (raw === "pending confirmation" || raw === "pending" || raw === "awaiting payment" || raw === "awaiting_payment") {
+    return "Awaiting Payment Confirmation";
+  }
+  if (raw === "confirmed" || raw === "payment confirmed" || raw === "paid") {
+    return "Payment Confirmed";
+  }
+  if (raw === "preparing") return "Preparing";
+  if (raw === "for delivery") return "For Delivery";
+  if (raw === "out for delivery") return "Out for Delivery";
+  if (raw === "delivered" || raw === "completed") return "Delivered";
+  return titleize(value);
 }
 
 function readSession() {
@@ -146,6 +169,12 @@ function renderAuthState() {
     panel.hidden = !loggedIn || !isSuperAdmin() || state.activeTab !== "admins";
   });
 
+  const viewSelect = document.getElementById("admin-view-select");
+  if (viewSelect) {
+    const adminOption = viewSelect.querySelector("option[value='admins']");
+    if (adminOption) adminOption.hidden = !isSuperAdmin();
+  }
+
   ["inventory-create", "promo-create", "admin-user-create"].forEach((id) => {
     const button = document.getElementById(id);
     if (button) {
@@ -155,17 +184,22 @@ function renderAuthState() {
 }
 
 function setActiveTab(tabName) {
-  state.activeTab = tabName;
+  const resolvedTab = tabName === "admins" && !isSuperAdmin() ? "orders" : tabName;
+  state.activeTab = resolvedTab;
   document.querySelectorAll("[data-admin-tab]").forEach((button) => {
-    const active = button.dataset.adminTab === tabName;
+    const active = button.dataset.adminTab === resolvedTab;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-selected", active ? "true" : "false");
   });
   document.querySelectorAll("[data-admin-panel]").forEach((panel) => {
     const panelName = panel.dataset.adminPanel;
     const isAdminsPanel = panelName === "admins";
-    panel.hidden = panelName !== tabName || (isAdminsPanel && !isSuperAdmin());
+    panel.hidden = panelName !== resolvedTab || (isAdminsPanel && !isSuperAdmin());
   });
+  const viewSelect = document.getElementById("admin-view-select");
+  if (viewSelect) {
+    viewSelect.value = resolvedTab;
+  }
 }
 
 function applyOverview() {
@@ -208,6 +242,29 @@ function createListRow({ title, meta = "", badge = "", buttonLabel = "Details", 
   return row;
 }
 
+function createTableRow({ primary, secondary, badge = "", buttonLabel = "Details", onClick }) {
+  const row = document.createElement("article");
+  row.className = "admin-table";
+  row.innerHTML = `
+    <div class="admin-table__cell admin-table__cell--primary"></div>
+    <div class="admin-table__cell admin-table__cell--secondary"></div>
+    <div class="admin-table__cell admin-table__cell--action">
+      <span class="pill admin-table__badge"></span>
+      <button class="cta cta--secondary admin-list-row__button" type="button">${buttonLabel}</button>
+    </div>
+  `;
+  row.querySelector(".admin-table__cell--primary").textContent = primary;
+  row.querySelector(".admin-table__cell--secondary").textContent = secondary;
+  const badgeNode = row.querySelector(".admin-table__badge");
+  if (badge) {
+    badgeNode.textContent = badge;
+  } else {
+    badgeNode.hidden = true;
+  }
+  row.querySelector("button").addEventListener("click", onClick);
+  return row;
+}
+
 function openAdminModal({ kicker = "Details", title = "Details", body }) {
   const wrap = document.getElementById("admin-modal");
   const kickerNode = document.getElementById("admin-modal-kicker");
@@ -239,8 +296,15 @@ function renderOrders() {
   list.innerHTML = "";
   const orders = Array.isArray(state.dashboard?.orders) ? state.dashboard.orders : [];
   const filtered = orders.filter((order) => {
-    if (state.orderFilter === "pending" && order.order_status !== "Pending Confirmation") return false;
-    if (state.orderFilter === "awaiting_payment" && order.payment_status !== "awaiting_payment") return false;
+    const normalizedStatus = normalizeOrderStatus(order.order_status);
+    if (state.orderFilter === "pending" && normalizedStatus !== "Awaiting Payment Confirmation") return false;
+    if (state.orderFilter === "payment_confirmed" && normalizedStatus !== "Payment Confirmed") return false;
+    if (state.orderFilter === "preparing" && normalizedStatus !== "Preparing") return false;
+    if (state.orderFilter === "for_delivery" && normalizedStatus !== "For Delivery") return false;
+    if (state.orderFilter === "out_for_delivery" && normalizedStatus !== "Out for Delivery") return false;
+    if (state.orderFilter === "delivered" && normalizedStatus !== "Delivered") return false;
+    if (state.orderFilter === "awaiting_payment" && String(order.payment_status || "").toLowerCase() !== "awaiting_payment")
+      return false;
     if (!state.orderSearch) return true;
     const haystack = [order.order_id, order.customer_name, order.phone_number, order.telegram_username]
       .join(" ")
@@ -250,25 +314,106 @@ function renderOrders() {
   if (empty) empty.hidden = filtered.length > 0;
   filtered.forEach((order) => {
     list.appendChild(
-      createListRow({
-        title: order.order_id || "-",
-        meta: [order.customer_name || "-", order.phone_number || "-", `Total ${peso(order.total)}`].join(" - "),
-        badge: order.order_status || "Pending",
+      createTableRow({
+        primary: order.order_id || "-",
+        secondary: order.customer_name || "-",
+        badge: normalizeOrderStatus(order.order_status),
         onClick: () => openOrderModal(order),
       })
     );
   });
 }
 
+function renderOrderItemEditor(items) {
+  const wrap = document.createElement("div");
+  wrap.className = "admin-modal-stack";
+  const rows = document.createElement("div");
+  rows.className = "admin-modal-stack";
+
+  const addRow = (item = null) => {
+    const row = document.createElement("div");
+    row.className = "admin-line-editor";
+    row.innerHTML = `
+      <label class="field">
+        <span>Product</span>
+        <select class="admin-order-item-sku"></select>
+      </label>
+      <label class="field">
+        <span>Qty</span>
+        <input class="admin-order-item-qty" type="number" min="1" step="1" value="1" />
+      </label>
+      <button class="cta cta--secondary admin-line-editor__remove" type="button">Remove</button>
+    `;
+    const select = row.querySelector(".admin-order-item-sku");
+    state.inventory.forEach((product) => {
+      const option = document.createElement("option");
+      option.value = product.sku;
+      option.textContent = `${product.name} (${peso(product.price)})`;
+      if (product.sku === String(item?.sku || "").toUpperCase()) option.selected = true;
+      select.appendChild(option);
+    });
+    row.querySelector(".admin-order-item-qty").value = item?.quantity || item?.qty || 1;
+    row.querySelector(".admin-line-editor__remove").addEventListener("click", () => {
+      row.remove();
+      if (!rows.children.length) addRow();
+    });
+    rows.appendChild(row);
+  };
+
+  (items || []).forEach((item) => addRow(item));
+  if (!rows.children.length) addRow();
+
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.className = "cta cta--secondary";
+  addButton.textContent = "Add Item";
+  addButton.addEventListener("click", () => addRow());
+  wrap.append(rows, addButton);
+  wrap.collectItems = () =>
+    Array.from(rows.querySelectorAll(".admin-line-editor")).map((row) => ({
+      sku: row.querySelector(".admin-order-item-sku").value,
+      quantity: Number(row.querySelector(".admin-order-item-qty").value || 1),
+    }));
+  return wrap;
+}
+
 function buildOrderModal(order) {
+  const superAdmin = isSuperAdmin();
+  const itemEditor = superAdmin ? renderOrderItemEditor(order.items || []) : null;
   const wrap = document.createElement("div");
   wrap.className = "admin-modal-stack";
   wrap.innerHTML = `
     <div class="admin-modal-block">
-      <p class="admin-note"><strong>Customer</strong><br>${order.customer_name || "-"}<br>${order.phone_number || "-"}${order.telegram_username ? `<br>@${order.telegram_username}` : ""}</p>
-      <p class="admin-note"><strong>Address</strong><br>${order.delivery_area || "Metro Manila"}<br>${order.delivery_address || "-"}</p>
-      <p class="admin-note"><strong>Items</strong><br>${(order.items || []).map((item) => `${item.name} x${item.quantity}`).join("<br>") || "No items attached."}</p>
-      <p class="admin-note"><strong>Payment</strong><br>${order.payment_method || "-"}<br>Total ${peso(order.total)}</p>
+      <div class="form-grid">
+        <label class="field">
+          <span>Name of Recipient</span>
+          <input id="modal-order-customer" type="text" />
+        </label>
+        <label class="field">
+          <span>Phone Number</span>
+          <input id="modal-order-phone" type="text" />
+        </label>
+      </div>
+      <div class="form-grid">
+        <label class="field">
+          <span>Delivery Area</span>
+          <input id="modal-order-area" type="text" />
+        </label>
+        <label class="field">
+          <span>Payment Method</span>
+          <select id="modal-order-payment-method"></select>
+        </label>
+      </div>
+      <label class="field">
+        <span>Delivery Address</span>
+        <textarea id="modal-order-address" rows="3"></textarea>
+      </label>
+      <label class="field">
+        <span>Order Notes</span>
+        <textarea id="modal-order-notes" rows="2" placeholder="Internal or order notes"></textarea>
+      </label>
+      <p class="admin-note"><strong>Telegram</strong><br>${order.telegram_username ? `@${order.telegram_username}<br>` : ""}${order.telegram_id || order.telegram_user_id || "No Telegram ID linked."}</p>
+      <p class="admin-note"><strong>Total</strong><br>${peso(order.total)}</p>
     </div>
     <div class="form-grid">
       <label class="field">
@@ -283,8 +428,11 @@ function buildOrderModal(order) {
     <label class="field">
       <span>Upload Order Photo</span>
       <input id="modal-order-photo" type="file" accept="image/*" />
-      <small class="field-hint">Temporary upload placeholder for phase 1 workflow.</small>
+      <small class="field-hint">Upload hook stays available here for the next phase.</small>
     </label>
+    <div class="admin-modal-block" id="modal-order-items-block">
+      <p class="admin-note"><strong>Order Items</strong></p>
+    </div>
     <label class="field">
       <span>Message Customer</span>
       <textarea id="modal-order-message" rows="3" placeholder="Type a delivery update or support note."></textarea>
@@ -301,10 +449,48 @@ function buildOrderModal(order) {
     const option = document.createElement("option");
     option.value = status;
     option.textContent = status;
-    if (status === (order.order_status || "Pending Confirmation")) option.selected = true;
+    if (status === normalizeOrderStatus(order.order_status)) option.selected = true;
     statusSelect.appendChild(option);
   });
+  const paymentMethodSelect = wrap.querySelector("#modal-order-payment-method");
+  PAYMENT_METHOD_OPTIONS.forEach((method) => {
+    const option = document.createElement("option");
+    option.value = method;
+    option.textContent = method;
+    if (method === (order.payment_method || "")) option.selected = true;
+    paymentMethodSelect.appendChild(option);
+  });
+  wrap.querySelector("#modal-order-customer").value = order.customer_name || "";
+  wrap.querySelector("#modal-order-phone").value = order.phone_number || "";
+  wrap.querySelector("#modal-order-area").value = order.delivery_area || "Metro Manila";
+  wrap.querySelector("#modal-order-address").value = order.delivery_address || "";
+  wrap.querySelector("#modal-order-notes").value = order.notes || "";
   wrap.querySelector("#modal-order-tracking").value = order.tracking_number || "";
+  const itemsBlock = wrap.querySelector("#modal-order-items-block");
+  if (superAdmin && itemEditor) {
+    itemsBlock.appendChild(itemEditor);
+  } else {
+    const note = document.createElement("p");
+    note.className = "admin-note";
+    note.innerHTML =
+      (order.items || []).map((item) => `${item.name} x${item.quantity || item.qty}`).join("<br>") ||
+      "No items attached.";
+    itemsBlock.appendChild(note);
+  }
+  if (!superAdmin) {
+    [
+      "#modal-order-customer",
+      "#modal-order-phone",
+      "#modal-order-area",
+      "#modal-order-address",
+      "#modal-order-payment-method",
+      "#modal-order-notes",
+      "#modal-order-photo",
+    ].forEach((selector) => {
+      const node = wrap.querySelector(selector);
+      if (node) node.disabled = true;
+    });
+  }
   wrap.querySelector("#modal-order-save").addEventListener("click", async () => {
     try {
       setFeedback("modal-order-feedback", "Saving update...");
@@ -312,6 +498,13 @@ function buildOrderModal(order) {
         order_id: order.order_id,
         status: wrap.querySelector("#modal-order-status").value,
         tracking_number: wrap.querySelector("#modal-order-tracking").value,
+        customer_name: wrap.querySelector("#modal-order-customer").value,
+        phone_number: wrap.querySelector("#modal-order-phone").value,
+        delivery_area: wrap.querySelector("#modal-order-area").value,
+        delivery_address: wrap.querySelector("#modal-order-address").value,
+        payment_method: wrap.querySelector("#modal-order-payment-method").value,
+        notes: wrap.querySelector("#modal-order-notes").value,
+        items: superAdmin && itemEditor ? itemEditor.collectItems() : undefined,
       });
       setFeedback("modal-order-feedback", "Order updated.", "success");
       await refreshDashboard();
@@ -408,13 +601,17 @@ function renderInventory() {
   const empty = document.getElementById("admin-inventory-empty");
   if (!list) return;
   list.innerHTML = "";
-  if (empty) empty.hidden = state.inventory.length > 0;
-  state.inventory.forEach((product) => {
+  const inventory = state.inventory.filter((product) => {
+    if (state.inventoryFilter === "all") return true;
+    return String(product.category || "").toLowerCase() === state.inventoryFilter;
+  });
+  if (empty) empty.hidden = inventory.length > 0;
+  inventory.forEach((product) => {
     list.appendChild(
-      createListRow({
-        title: product.name || "-",
-        meta: [product.sku || "-", peso(product.price || 0)].join(" - "),
-        badge: product.category || "-",
+      createTableRow({
+        primary: product.name || "-",
+        secondary: peso(product.price || 0),
+        badge: titleize(product.category || "-"),
         onClick: () => openInventoryModal(product),
       })
     );
@@ -699,9 +896,9 @@ function renderReports() {
   const report = state.dashboard?.report || {};
   summary.innerHTML = "";
   [
-    `Gross Sales - ${peso(report.gross_sales || 0)}`,
-    `Order Count - ${report.order_count || 0}`,
-    `Average Order Value - ${peso(report.average_order_value || 0)}`,
+    `Delivered Sales - ${peso(report.gross_sales || 0)}`,
+    `Delivered Orders - ${report.order_count || 0}`,
+    `Average Delivered Order - ${peso(report.average_order_value || 0)}`,
     `Statuses - ${Object.entries(report.by_status || {}).map(([key, value]) => `${key}: ${value}`).join(" • ") || "No data"}`,
   ].forEach((line) => {
     const row = document.createElement("article");
@@ -729,7 +926,9 @@ function downloadCsv(filename, rows) {
 }
 
 function exportSalesReport() {
-  const orders = Array.isArray(state.dashboard?.orders) ? state.dashboard.orders : [];
+  const orders = (Array.isArray(state.dashboard?.orders) ? state.dashboard.orders : []).filter(
+    (order) => normalizeOrderStatus(order.order_status) === "Delivered"
+  );
   const rows = [
     ["order_number", "customer_name", "phone_number", "status", "payment_method", "total", "created_at"],
     ...orders.map((order) => [
@@ -844,6 +1043,11 @@ function bindEvents() {
     });
   });
 
+  document.getElementById("admin-view-select")?.addEventListener("change", (event) => {
+    setActiveTab(event.target.value || "orders");
+    closeAdminModal();
+  });
+
   document.querySelectorAll("[data-admin-modal-close]").forEach((button) => {
     button.addEventListener("click", closeAdminModal);
   });
@@ -856,6 +1060,11 @@ function bindEvents() {
   document.getElementById("order-search")?.addEventListener("input", () => {
     state.orderSearch = document.getElementById("order-search").value.trim();
     renderOrders();
+  });
+
+  document.getElementById("inventory-filter")?.addEventListener("change", (event) => {
+    state.inventoryFilter = event.target.value || "all";
+    renderInventory();
   });
 
   document.getElementById("inventory-create")?.addEventListener("click", () => openInventoryModal(null));
